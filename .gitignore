@@ -1,0 +1,12 @@
+.superpowers/
+.codegraph/
+.omo/
+.agents/
+scrollcraft/
+site/node_modules/
+site/lab/shots/*
+!site/lab/shots/report.json
+site/lab/redesign/*.png
+*.log
+*.tmp
+.DS_Store

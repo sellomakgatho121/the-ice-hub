@@ -1,0 +1,68 @@
+{
+  "checks": [
+    {
+      "width": 320,
+      "keyboard": true,
+      "choices": [
+        "cubes",
+        "blocks",
+        "spheres",
+        "drinks",
+        "venue"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "reducedFrame": "assets/reel/ezgif-frame-021.jpg"
+    },
+    {
+      "width": 390,
+      "keyboard": true,
+      "choices": [
+        "cubes",
+        "blocks",
+        "spheres",
+        "drinks",
+        "venue"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "reducedFrame": "assets/reel/ezgif-frame-021.jpg"
+    },
+    {
+      "width": 768,
+      "keyboard": true,
+      "choices": [
+        "cubes",
+        "blocks",
+        "spheres",
+        "drinks",
+        "venue"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "reducedFrame": "assets/reel/ezgif-frame-021.jpg"
+    },
+    {
+      "width": 1440,
+      "keyboard": true,
+      "choices": [
+        "cubes",
+        "blocks",
+        "spheres",
+        "drinks",
+        "venue"
+      ],
+      "axeViolations": 0,
+      "overflow": false,
+      "reducedFrame": "assets/reel/ezgif-frame-021.jpg"
+    },
+    {
+      "webglUnavailable": "static image rendered, no uncaught exception"
+    },
+    {
+      "demoSubmit": "validation and no-email confirmation verified"
+    }
+  ],
+  "errors": [],
+  "ok": true
+}

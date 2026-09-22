@@ -1,0 +1,57 @@
+{
+  "url": "http://127.0.0.1:8018",
+  "steps": [
+    {
+      "name": "hero frame scrub",
+      "distinct": 6,
+      "frames": [
+        "assets/reel/ezgif-frame-001.jpg",
+        "assets/reel/ezgif-frame-009.jpg",
+        "assets/reel/ezgif-frame-017.jpg",
+        "assets/reel/ezgif-frame-024.jpg",
+        "assets/reel/ezgif-frame-032.jpg",
+        "assets/reel/ezgif-frame-040.jpg"
+      ],
+      "ok": true
+    },
+    {
+      "name": "runtime systems",
+      "canvas": false,
+      "webgl": false,
+      "staticFallback": true,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "fonts": "loaded",
+      "cards": 5,
+      "framesLoaded": 40,
+      "ok": true
+    },
+    {
+      "name": "form validation",
+      "message": "Enter a valid email so we can confirm your pre-order.",
+      "ok": true
+    },
+    {
+      "name": "axe",
+      "violations": [],
+      "ok": true
+    },
+    {
+      "name": "reduced motion",
+      "bodyState": "still",
+      "heroHeight": 900,
+      "viewport": 900,
+      "frame": "assets/reel/ezgif-frame-021.jpg",
+      "rangeHeight": 1338.265625,
+      "ok": true
+    },
+    {
+      "name": "mobile layout",
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "minTarget": 44,
+      "ok": true
+    }
+  ],
+  "errors": []
+}

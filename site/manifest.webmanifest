@@ -1,0 +1,12 @@
+{
+  "name": "The Ice Hub",
+  "short_name": "Ice Hub",
+  "description": "Clear, slow ice for drinks that matter.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a1216",
+  "theme_color": "#0a1216",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

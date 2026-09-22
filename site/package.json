@@ -1,0 +1,13 @@
+{
+  "name": "the-ice-hub-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python -m http.server 8000",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "playwright": "^1.55.0"
+  }
+}
