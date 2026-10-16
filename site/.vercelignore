@@ -1,0 +1,27 @@
+# Keep the deploy to what a browser actually fetches.
+# Everything here would otherwise be uploaded, publicly served, and billed.
+
+# Development harness and evidence. Not part of the site.
+lab/
+shoot.mjs
+platform-spoof.cjs
+
+# Archived snapshots of the previous builds.
+versions/
+
+# Design and process documents. They live at the repo root, not the site root.
+REDESIGN.md
+README.md
+
+# Tooling that only matters on the build host.
+scripts/verify.mjs
+scripts/verify-redesign.mjs
+scripts/check-contrast.mjs
+package.json
+package-lock.json
+node_modules/
+
+# Never ship a credential. The Web3Forms key lives in config.js and must stay
+# placeholder on any public deploy.
+.env
+.env.*

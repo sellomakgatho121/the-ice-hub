@@ -1,88 +1,207 @@
-const TOTAL = 40;
+/* The Ice Hub — hero reel scrub.
+ *
+ * Two stacked <img> layers crossfade between frames. A single layer with a
+ * swapped `src` produces one hard snap per frame change, which reads as
+ * choppy no matter how the scroll handler is tuned; dissolving the two layers
+ * is what actually removes the stutter. `img.decode()` guarantees a frame is
+ * rasterised before it is faded in, so a frame can never paint late or flash.
+ */
+
+const TOTAL = 48;
 const PAD = 3;
-const FRAME = (n) => `assets/reel/ezgif-frame-${String(n).padStart(PAD, "0")}.jpg`;
-const reel = document.getElementById("top");
-const img = document.getElementById("reel-img");
+const FRAME = (n) => `assets/reel/frame-${String(n).padStart(PAD, "0")}.webp`;
+
+/* Beat frame ranges, mapped to the animation rather than to arithmetic.
+ *
+ * The reel MERGES two clips the owner supplied as one continuous 15s sequence:
+ *
+ *   reel frames  1-25  = video 1 frames   1-168   (0.0-7.0s, 1280x720 source)
+ *   reel frames 26-48  = video 2 frames   1-192   (7.0-15.0s,  640x360 source)
+ *
+ * Video 1 holds the bag still, tilts, bursts at ~3.0s, then tumbles.
+ * Video 2 continues that tumble: ice cascading, the bag rising out of frame,
+ * and the pile settling to a stop. Their motion profiles are complementary -
+ * video 1 accelerates out (0.2 -> 5.8), video 2 decelerates in (5.2 -> 0.4).
+ *
+ * The two clips share NO overlapping frame: the closest any video 2 frame gets
+ * to any video 1 frame is 7.6x an in-sequence step, where true overlap would be
+ * ~0. The join is therefore a real discontinuity and is handled as a cut.
+ *
+ * Density is the governing constraint:
+ * px/frame = (heroVh - 100)/100 * viewportHeight / 48. At 180svh that is
+ * ~15 px/frame, inside the comfortable 15-20 band.
+ */
+const BEATS = [
+  [1, 7],
+  [8, 14],
+  [15, 25],
+  [26, 48],
+];
+
+/* The seam between the two clips.
+ *
+ * Cutting video 1 at frame 168 and starting video 2 at frame 1 is the
+ * smoothest available join, measured at 6.64x the mean in-sequence step. For
+ * scale the previous ice clip's deliberate cut measured 2.9x its own mean, so
+ * this seam is well over twice as violent as an ordinary edit. It is placed
+ * exactly on the beat 3/4 boundary and swapped WITHOUT a crossfade, so it
+ * reads as an edit rather than a stutter. Every other transition dissolves.
+ *
+ * Set to 0 if a future clip has no internal discontinuity.
+ */
+const CUT_AFTER = 25;
+
+const hero = document.querySelector("[data-hero]");
+const layers = [...document.querySelectorAll("[data-reel-layer]")];
+const media = layers[0]?.parentElement;
 const bar = document.querySelector("[data-reel-bar]");
 const indexLabel = document.querySelector("[data-frame-index]");
+const totalLabel = document.querySelector("[data-frame-total]");
+const beatNodes = [...document.querySelectorAll("[data-beat]")];
+
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const saveData = navigator.connection?.saveData === true;
+const slowConnection = /(^|-)2g$/.test(navigator.connection?.effectiveType ?? "");
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
 const cache = new Map();
-let lastIndex = -1;
+let front = 0;
+let lastIndex = 1;
+let lastBeat = 0;
+let token = 0;
 let ticking = false;
+let disposed = false;
 
-function preload(n) {
-  if (cache.has(n)) return cache.get(n);
-  const frame = new Image();
-  frame.decoding = "async";
-  frame.src = FRAME(n);
-  cache.set(n, frame);
-  return frame;
+function warm(n) {
+  if (cache.has(n)) return;
+  const img = new Image();
+  img.decoding = "async";
+  img.src = FRAME(n);
+  cache.set(n, img);
 }
 
-[1, 8, 16, 24, 32, 40].forEach(preload);
-function loaded(frame) {
-  if (frame.complete) return Promise.resolve();
-  return new Promise((resolve) => {
-    frame.addEventListener("load", resolve, { once: true });
-    frame.addEventListener("error", resolve, { once: true });
-  });
-}
-async function warmCache() {
-  for (let start = 1; start <= TOTAL; start += 4) {
-    const batch = [];
-    for (let n = start; n < Math.min(start + 4, TOTAL + 1); n += 1) batch.push(loaded(preload(n)));
-    await Promise.all(batch);
+function paintBeat(beat) {
+  if (beat === lastBeat) return;
+  lastBeat = beat;
+  for (const node of beatNodes) {
+    if (Number(node.dataset.beat) === beat) node.setAttribute("data-active", "");
+    else node.removeAttribute("data-active");
   }
 }
-if ("requestIdleCallback" in window) requestIdleCallback(() => warmCache(), { timeout: 1200 });
-else setTimeout(() => warmCache(), 300);
 
-function progress() {
-  if (!reel) return 0;
-  const rect = reel.getBoundingClientRect();
-  const runway = Math.max(reel.offsetHeight - window.innerHeight, 1);
-  return Math.min(1, Math.max(0, -rect.top / runway));
+async function show(idx, hard) {
+  const mine = ++token;
+  const back = layers[1 - front];
+  if (!back) return;
+
+  back.src = FRAME(idx);
+
+  if (back.decode) {
+    try {
+      await back.decode();
+    } catch {
+      return;
+    }
+  } else if (!back.complete) {
+    await new Promise((resolve) => {
+      back.addEventListener("load", resolve, { once: true });
+      back.addEventListener("error", resolve, { once: true });
+    });
+  }
+  if (!back.complete || back.naturalWidth === 0) return;
+
+  if (mine !== token || disposed || reducedQuery.matches) return;
+
+  if (hard && media) {
+    media.classList.add("is-hard");
+    requestAnimationFrame(() => requestAnimationFrame(() => media.classList.remove("is-hard")));
+  }
+
+  layers[front].classList.remove("is-front");
+  back.classList.add("is-front");
+  front = 1 - front;
 }
 
 function paint() {
   ticking = false;
-  if (reducedQuery.matches) return;
-  const t = progress();
-  const idx = Math.min(TOTAL, Math.max(1, Math.round(1 + t * (TOTAL - 1))));
+  if (disposed || reducedQuery.matches || !hero) return;
+
+  const rect = hero.getBoundingClientRect();
+  const runway = Math.max(hero.offsetHeight - window.innerHeight, 1);
+  const t = clamp(-rect.top / runway, 0, 1);
+  const idx = clamp(1 + Math.floor(t * TOTAL), 1, TOTAL);
+
+  paintBeat(BEATS.findIndex(([a, b]) => idx >= a && idx <= b) + 1);
+  if (bar) bar.style.transform = `scaleX(${t.toFixed(4)})`;
+
   if (idx === lastIndex) return;
+  const hard = lastIndex === CUT_AFTER;
   lastIndex = idx;
-  const next = preload(idx);
-  const apply = () => {
-    if (idx !== lastIndex || reducedQuery.matches) return;
-    img.src = FRAME(idx);
-    indexLabel.textContent = String(idx).padStart(PAD, "0");
-    bar.style.transform = `scaleX(${t})`;
-    reel.style.setProperty("--hero-p", t.toFixed(4));
-  };
-  if (next.complete) apply();
-  else next.addEventListener("load", apply, { once: true });
+  if (indexLabel) indexLabel.textContent = String(idx).padStart(PAD, "0");
+
+  show(idx, hard);
 }
 
 function queuePaint() {
-  if (ticking) return;
+  if (ticking || disposed) return;
   ticking = true;
   requestAnimationFrame(paint);
 }
 
+async function warmAll() {
+  for (let n = 1; n <= TOTAL; n += 4) {
+    for (let k = n; k < Math.min(n + 4, TOTAL + 1); k += 1) {
+      warm(k);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+  }
+}
+
 function setReducedState(reduced) {
   if (reduced) {
-    img.src = FRAME(21);
-    indexLabel.textContent = "021";
-    bar.style.transform = "scaleX(.52)";
-    reel.style.setProperty("--hero-p", ".52");
+    token += 1;
+    layers.forEach((layer, i) => {
+      layer.src = FRAME(1);
+      layer.classList.toggle("is-front", i === 0);
+    });
+    front = 0;
+    if (indexLabel) indexLabel.textContent = "01";
+    if (bar) bar.style.transform = "scaleX(0)";
+    paintBeat(1);
     document.body.dataset.state = "still";
-  } else {
-    document.body.dataset.state = "ready";
-    queuePaint();
+    return;
   }
+  document.body.dataset.state = "ready";
+  queuePaint();
+}
+
+// Metered connections are common in Tembisa: warm sparsely, never the full run.
+if (!saveData && !slowConnection) {
+  [1, 2, 8, 15, 22, 26, 34, 48].forEach(warm);
+  if ("requestIdleCallback" in window) requestIdleCallback(() => warmAll(), { timeout: 2000 });
+  else setTimeout(() => warmAll(), 500);
+} else {
+  [1, 48].forEach(warm);
 }
 
 window.addEventListener("scroll", queuePaint, { passive: true });
 window.addEventListener("resize", queuePaint, { passive: true });
 reducedQuery.addEventListener?.("change", (event) => setReducedState(event.matches));
+
+if ("IntersectionObserver" in window && hero) {
+  new IntersectionObserver(
+    (entries) => {
+      disposed = !entries[0].isIntersecting;
+      if (disposed) token += 1;
+      else queuePaint();
+    },
+    { rootMargin: "100% 0px" },
+  ).observe(hero);
+}
+
 setReducedState(reducedQuery.matches);
+
+/* Derived from TOTAL, not hardcoded: the hero still read "01 -> 20" after the
+   reel grew to 48 frames, because the number had been written into the markup. */
+if (totalLabel) totalLabel.textContent = String(TOTAL);

@@ -38,6 +38,22 @@ export const SHOP = {
     5: { open: 10 * 60, close: 19 * 60 },
     6: { open:  9 * 60, close: 21 * 60 },
   },
+
+  // WhatsApp destination, digits only, no "+" — wa.me requires it.
+  whatsappDigits: "27818592919",
+  whatsappDisplay: "+27 81 859 2919",
+  deliveryClaim: "Free delivery around Tembisa",
+
+  // Prices from the pricing flyer effective 20 May 2026.
+  // stockPrice applies to the WHOLE line once quantity reaches stockThreshold.
+  products: [
+    { id: "cubes-2kg", name: "2 kg ice cubes", messageName: "2 kg ice-cube bag",
+      standardPrice: 17, stockPrice: 10, stockThreshold: 20, use: "Everyday" },
+    { id: "cubes-3kg", name: "3 kg ice cubes", messageName: "3 kg ice-cube bag",
+      standardPrice: 22, stockPrice: 12, stockThreshold: 20, use: "Events" },
+    { id: "block-30kg", name: "30 kg ice block", messageName: "30 kg ice block",
+      standardPrice: 55, stockPrice: null, stockThreshold: null, use: "Venues" },
+  ],
 };
 
 // Demo mode is on when the key is the placeholder. Surfaced in the form hint.

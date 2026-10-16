@@ -1,90 +1,128 @@
 # The Ice Hub
 
-An editorial product story for a counter-service ice shop in Tembisa. The redesigned layout separates typography from product imagery and keeps practical information in normal document flow. The 40-frame scroll film remains; the fracture scene uses a real-image fallback if WebGL is unavailable or lost.
+A storefront for a counter-service ice shop in Tembisa. Static HTML, CSS and
+native ES modules — no framework, no build step, no CMS, and no third-party
+request on load. Orders are composed in the browser and handed to WhatsApp;
+nothing is stored and no customer data leaves the device.
+
+The design contract that governs this build is [`../DESIGN.md`](../DESIGN.md).
+It supersedes `BRAND.md`, `BRIEF.md` and `spec/`.
 
 ## Experience architecture
 
-1. **Hero reel:** 40 local JPEG frames scrubbed directly by scroll position.
-2. **Process:** image and production notes in a responsive editorial spread.
-3. **The crack:** one procedural Three.js scene with an explicit static-image fallback. Eight facets separate and reform when WebGL is available.
-4. **Material:** a restrained statement and vertically arranged product notes.
-5. **Range:** five visible product rows. Each action selects the corresponding order and focuses the email field.
-6. **Hours:** live SAST open/closed state and a compact opening-hours table.
-7. **Visit and pre-order:** contact details, an opt-in OpenStreetMap embed and Web3Forms integration (currently demo mode).
+1. **Hero reel** — 48 frames merged from two supplied clips into one continuous
+   15s sequence, at 640×360 WebP q72 (589 KB, 41.9 dB). Frame density is the
+   governing constraint: `px/frame = (heroVh − 100)/100 × viewportHeight ÷
+   frameCount`. The hero is **180svh** to hold that at ~15 px/frame; the
+   previous 390svh/20-frame build gave 130.5 px/frame and read as choppy.
+   The join between the two clips is a real discontinuity (they share no
+   overlapping frame), so it sits exactly on the beat 3/4 boundary and swaps
+   without a crossfade; all other transitions dissolve.
+2. **Counter** — three products with real prices, quantity steppers and a live
+   estimated total. Crossing 20 bags drops the whole line to stock price and
+   is announced in a polite live region.
+3. **Audience** — three cards that differ in *structure* (prose-led,
+   figure-led, list-led), not merely in vertical offset.
+4. **Visit** — SAST open/closed status, full static hours, address,
+   click-to-call, and an opt-in map that contacts nobody until it is pressed.
 
-The page stays in one visual world. There is no client router, autoplay video, stock artwork or generic component library.
+Every section works with JavaScript disabled: static prices, full hours,
+address, click-to-call, and a direct WhatsApp link per product. The quantity
+builder is *absent* in that case, not broken.
 
 ## Design system
 
-- **Display:** Bricolage Grotesque Variable, self-hosted
-- **Text:** Instrument Sans Variable, self-hosted
-- **Utility:** JetBrains Mono, self-hosted
-- **Icons:** local 1.5 px outline SVG sprite based on Lucide's visual grammar
-- **Palette:** mineral ink, glacier white, ice blue and a single amber action color
-- **Motion:** transform and opacity only; every continuous effect is disabled or collapsed under `prefers-reduced-motion`
-
-The complete rules are in [`BRAND.md`](../BRAND.md), and the narrative plan is in [`BRIEF.md`](../BRIEF.md).
+- **Display:** Bodoni Moda Variable (`wght` 400–900, `opsz` 6–96), self-hosted
+- **Text:** Manrope Variable (`wght` 200–800), self-hosted
+- **Numeric:** JetBrains Mono, self-hosted (prices use tabular figures)
+- **Icons:** local 1.5 px Lucide sprite, 16 symbols, stroke width baked into
+  each `<symbol>` so an external `<use>` cannot silently inherit 2 px
+- **Materials:** Refraction (hero), Glass (four gated surfaces only), Etched
+  (quiet planes), Counter (commerce)
+- **Motion:** transform and opacity only; honoured in JavaScript as well as
+  CSS, so the scrub does not keep running when CSS disables it
 
 ## Project structure
 
 ```text
 site/
-  assets/reel/            deployable copy of all 40 hero frames
-  fonts/                  self-hosted WOFF2 variable fonts
-  vendor/three.module.min.js
+  assets/reel/            48 hero frames, 640x360 WebP (frame-001 … frame-048)
+  fonts/                  self-hosted WOFF2
   scripts/
-    reel.js               frame loading and scroll scrub
-    motion.js             section progress, rail motion and reveals
-    crystal.js            procedural WebGL crystal
-    hours.js              SAST shop status
-    map.js                deferred OSM map
-    form.js               validation and Web3Forms submission
-    verify.mjs            Playwright and axe verification
+    order.js              pure pricing/total/WhatsApp logic (unit-tested)
+    order-ui.js           steppers, live total, bulk announcement
+    hours.js              SAST shop status (unit-tested)
+    reel.js               frame scrub, beat activation, reduced motion
+    nav.js                header state, active section, year
+    map.js                deferred opt-in OSM embed
+    check-contrast.mjs    cascade-aware WCAG contrast gate
+    verify.mjs            Playwright + axe gate (needs a real Chromium)
   icons.svg               local outline symbol sprite
   index.html
-  styles.css
+  styles.css              tokens, materials, components
 ```
 
-The original source frames remain in `Hero section images/`. They are copied into `site/assets/reel/` because the deployed static site cannot request files above its public root.
+`vendor/`, `crystal.js`, `form.js` and `motion.js` were removed: WebGL and
+Web3Forms both violate the zero-third-party-request rule.
 
 ## Local development
 
 ```bash
 cd site
-npm install
-npm run serve
+npm run serve     # http://localhost:8000
 ```
-
-Open <http://localhost:8000>.
 
 ## Verification
 
-With the local server running:
+Two tiers, because they can run in different places:
 
 ```bash
-cd site
-npm run verify
+npm run verify:host    # runs anywhere: unit tests + contrast gate
+npm run verify         # the above, then the browser gate
 ```
 
-The verifier checks:
+`verify:host` is what can execute on a machine without a browser. It runs the
+`node:test` suites for pricing, totals, WhatsApp URL and SAST status, then
+`check-contrast.mjs`, which resolves the CSS cascade for every element on the
+bright counter surface and checks each winning colour pair against WCAG 1.4.3.
+That gate is proven, not assumed: injecting `--frost` or `--mist` onto the
+counter makes it fail with exit 1.
 
-- six distinct hero frames at exact reel depths
-- local fonts, frame resources, and a healthy WebGL context or loaded image fallback
-- five product cards and zero horizontal document overflow
-- custom pre-order validation
-- WCAG A/AA with axe
-- reduced-motion collapse to a static frame
-- 390 × 844 mobile layout and 44 px minimum touch targets
-- desktop and mobile screenshots in `site/lab/shots/`
+`verify` additionally runs `verify.mjs` in a real Chromium, with
+`@axe-core/playwright` for the a11y pass. It covers the resilience rows in
+DESIGN.md §8b: reel frame failure, reduced motion, JavaScript disabled, opt-in
+map, and 44 px tap targets at 390 px.
 
-## Form setup
+**It runs here, and it passes — 28/28, zero runtime errors.** Getting Chromium
+onto this host took three steps that are easy to repeat on another Android
+box:
 
-The form remains in demo mode until a valid Web3Forms key is added to `site/config.js`. Follow [`lab/web3forms-setup.md`](../lab/web3forms-setup.md). Do not commit a live key to a public repository.
+1. Node reports `process.platform === 'android'` and Playwright refuses to
+   resolve a browser. `platform-spoof.cjs` relabels it to `linux`; ESM hoists
+   static imports, so the imports must be **dynamic** (`await import(...)`) or
+   the spoof lands too late.
+2. `NODE_OPTIONS="--require ./platform-spoof.cjs" node node_modules/playwright/cli.js install chromium`
+   then installs the normal linux-arm64 build. Its dependency check fails
+   harmlessly; the binary still lands.
+3. Seven shared libraries were missing. `apt-get install -y --no-install-recommends
+   libnspr4 libnss3 libatk1.0-0t64 libxcomposite1 libxdamage1 libatspi2.0-0t64`
+   resolves every one.
+
+**What this gate has already caught that static analysis could not:** the
+header WhatsApp CTA at 1.22:1 (a `.header__nav a` rule outranking `.cta`),
+the fixed order summary dropping to 1.64:1 over the bright counter, hero text
+running off the left edge for want of a gutter, product icons rendering at
+~100 px, and six tap targets under 44 px.
+
+### Screenshots
+
+`node scripts/shoot.mjs` writes desktop and mobile captures to `lab/shots/`.
+Rendering is the only way to catch layout defects, and on this project it
+found four that no amount of static checking had.
 
 ## Shop details
 
 - 9605 Winnie Mandela Zone 4, Raymond Mhlaba Street, Tembisa 1632
 - +27 81 859 2919
-- Lebomorena3@gmail.com
 - Monday to Friday: 10:00 to 19:00
 - Saturday to Sunday: 09:00 to 21:00

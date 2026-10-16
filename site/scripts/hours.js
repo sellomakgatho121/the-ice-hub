@@ -1,60 +1,52 @@
-/* The Ice Hub — open-now status.
- * Computes whether the shop is currently open. The shop's timezone and
- * weekly schedule are configured in site/config.js (Africa/Johannesburg).
- * The status is announced via aria-live="polite" so screen readers
- * pick it up.
- */
-
 import { SHOP } from "../config.js";
 
-const fmt = new Intl.DateTimeFormat("en-ZA", {
+const WEEKDAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+const zonedParts = new Intl.DateTimeFormat("en-ZA", {
+  weekday: "short",
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
   timeZone: SHOP.timezone,
 });
 
-function minutesNowInShopTz() {
-  const parts = fmt.formatToParts(new Date());
-  const hh = Number(parts.find((p) => p.type === "hour").value);
-  const mm = Number(parts.find((p) => p.type === "minute").value);
-  const hour = hh === 24 ? 0 : hh;
-  return hour * 60 + mm;
-}
+const hhmm = (minutes) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
-function dayInShopTz() {
-  const d = new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    timeZone: SHOP.timezone,
-  }).format(new Date());
-  return { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[d] ?? 0;
-}
+/**
+ * Shop status for an instant. Derives the weekday and clock entirely from
+ * zoned parts of `date`, so a visitor's own timezone cannot shift the answer.
+ * Never throws: an unresolvable timezone or schedule row yields "closed".
+ */
+export function getShopStatus(date = new Date()) {
+  let day;
+  let now;
+  try {
+    const parts = zonedParts.formatToParts(date);
+    const get = (type) => parts.find((p) => p.type === type)?.value;
+    day = WEEKDAY_INDEX[get("weekday")] ?? 0;
+    const hour = Number(get("hour")) % 24;
+    now = hour * 60 + Number(get("minute"));
+  } catch {
+    return { state: "closed", label: "Status unavailable" };
+  }
 
-function status() {
-  const day = dayInShopTz();
-  const now = minutesNowInShopTz();
   const row = SHOP.schedule[day];
   if (!row) return { state: "closed", label: "Closed today" };
-  if (now >= row.open && now < row.close) {
-    const closes = fmt.format(new Date(Date.now() + (row.close - now) * 60_000));
-    return { state: "open", label: `Open now \u00b7 closes ${closes}` };
-  }
-  if (now < row.open) {
-    const opens = new Date();
-    opens.setHours(Math.floor(row.open / 60), row.open % 60, 0, 0);
-    const t = fmt.format(opens);
-    return { state: "closed", label: `Closed \u00b7 opens ${t}` };
-  }
+  if (now < row.open) return { state: "closed", label: `Closed · opens ${hhmm(row.open)}` };
+  if (now < row.close) return { state: "open", label: `Open now · closes ${hhmm(row.close)}` };
   return { state: "closed", label: "Closed for the day" };
 }
 
-function paint() {
-  const el = document.querySelector("[data-open-status]");
+export function paintOpenStatus(root = document) {
+  const el = root.querySelector("[data-open-status]");
   if (!el) return;
-  const s = status();
-  el.dataset.openStatus = s.state;
-  el.textContent = s.label;
+  const status = getShopStatus();
+  el.dataset.openStatus = status.state;
+  el.textContent = status.label;
 }
 
-paint();
-setInterval(paint, 60_000);
+if (typeof document !== "undefined") {
+  paintOpenStatus();
+  setInterval(() => paintOpenStatus(), 60_000);
+}

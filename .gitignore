@@ -3,10 +3,22 @@
 .omo/
 .agents/
 scrollcraft/
+node_modules/
 site/node_modules/
 site/lab/shots/*
 !site/lab/shots/report.json
 site/lab/redesign/*.png
+incoming/
 *.log
 *.tmp
 .DS_Store
+
+# Vercel: links this directory to a project ID and writes local build state.
+# Committing it leaks the project reference and breaks other clones' deploys.
+.vercel/
+
+# Credentials must never reach the repo. config.js ships to the browser, so a
+# live key pasted there is public the moment it deploys.
+.env
+.env.*
+!.env.example

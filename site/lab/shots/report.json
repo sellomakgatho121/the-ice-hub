@@ -1,56 +1,246 @@
 {
-  "url": "http://127.0.0.1:8000",
+  "url": "http://localhost:8000",
+  "executable": "/root/.cache/ms-playwright/chromium_headless_shell-1234/chrome-linux/headless_shell",
   "steps": [
     {
-      "name": "hero frame scrub",
-      "distinct": 6,
+      "name": "hero scrub shows distinct frames",
+      "ok": true,
       "frames": [
-        "assets/reel/ezgif-frame-001.jpg",
-        "assets/reel/ezgif-frame-009.jpg",
-        "assets/reel/ezgif-frame-017.jpg",
-        "assets/reel/ezgif-frame-024.jpg",
-        "assets/reel/ezgif-frame-032.jpg",
-        "assets/reel/ezgif-frame-040.jpg"
+        "assets/reel/frame-001.webp",
+        "assets/reel/frame-010.webp",
+        "assets/reel/frame-020.webp",
+        "assets/reel/frame-029.webp",
+        "assets/reel/frame-039.webp",
+        "assets/reel/frame-048.webp"
       ],
+      "distinct": 6
+    },
+    {
+      "name": "frames stay inside the 48-frame reel",
+      "ok": true,
+      "frames": [
+        "assets/reel/frame-001.webp",
+        "assets/reel/frame-010.webp",
+        "assets/reel/frame-020.webp",
+        "assets/reel/frame-029.webp",
+        "assets/reel/frame-039.webp",
+        "assets/reel/frame-048.webp"
+      ],
+      "indices": [
+        1,
+        10,
+        20,
+        29,
+        39,
+        48
+      ]
+    },
+    {
+      "name": "exactly one reel layer is frontmost",
       "ok": true
     },
     {
-      "name": "runtime systems",
-      "canvas": false,
-      "webgl": false,
-      "staticFallback": true,
+      "name": "crossfade duration is set on the reel",
+      "ok": true
+    },
+    {
+      "name": "exactly one beat active at a time",
+      "ok": true,
+      "beats": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "4",
+        "4"
+      ]
+    },
+    {
+      "name": "four beats in order",
+      "ok": true,
+      "beats": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "three product cards, no canvas, no WebGL",
+      "ok": true,
       "pageWidth": 1440,
       "viewportWidth": 1440,
       "fonts": "loaded",
-      "cards": 5,
-      "framesLoaded": 40,
+      "cards": 3,
+      "frames": 48,
+      "canvas": false
+    },
+    {
+      "name": "no horizontal overflow at 1440",
+      "ok": true,
+      "pageWidth": 1440,
+      "viewportWidth": 1440,
+      "fonts": "loaded",
+      "cards": 3,
+      "frames": 48,
+      "canvas": false
+    },
+    {
+      "name": "fonts loaded",
+      "ok": true,
+      "fonts": "loaded"
+    },
+    {
+      "name": "reel frame count within the set",
+      "ok": true,
+      "frames": 48
+    },
+    {
+      "name": "no third-party request on load",
+      "ok": true,
+      "thirdParty": []
+    },
+    {
+      "name": "20 bags drop the whole line to stock price",
+      "ok": true,
+      "price": "R10",
+      "total": "R200",
+      "announced": "2 kg ice-cube bag stock price applied: R10 each for the whole line. Estimated total R200.",
+      "summaryHidden": false
+    },
+    {
+      "name": "live total updates",
+      "ok": true,
+      "price": "R10",
+      "total": "R200",
+      "announced": "2 kg ice-cube bag stock price applied: R10 each for the whole line. Estimated total R200.",
+      "summaryHidden": false
+    },
+    {
+      "name": "threshold crossing is announced politely",
+      "ok": true,
+      "price": "R10",
+      "total": "R200",
+      "announced": "2 kg ice-cube bag stock price applied: R10 each for the whole line. Estimated total R200.",
+      "summaryHidden": false
+    },
+    {
+      "name": "summary visible once items exist",
+      "ok": true,
+      "price": "R10",
+      "total": "R200",
+      "announced": "2 kg ice-cube bag stock price applied: R10 each for the whole line. Estimated total R200.",
+      "summaryHidden": false
+    },
+    {
+      "name": "WhatsApp handoff encodes the order",
+      "ok": true,
+      "waHref": "https://wa.me/27818592919?text=Hello+The+Ice+Hub%2C+I+would+like+to+order%3A%0A%"
+    },
+    {
+      "name": "quantity floors at zero, control disables, summary hides",
+      "ok": true,
+      "qty": "0",
+      "decrementDisabled": true,
+      "summaryHidden": true
+    },
+    {
+      "name": "stepper re-enables above zero and the summary returns",
+      "ok": true,
+      "qty": "2",
+      "decrementDisabled": false,
+      "summaryHidden": false
+    },
+    {
+      "name": "map panel absent until requested",
+      "ok": true,
+      "thirdParty": []
+    },
+    {
+      "name": "axe: zero WCAG A/AA violations",
+      "ok": true,
+      "violations": []
+    },
+    {
+      "name": "a failed reel frame holds the nearest frame, never blanks",
       "ok": true
     },
     {
-      "name": "form validation",
-      "message": "Enter a valid email so we can confirm your pre-order.",
-      "ok": true
-    },
-    {
-      "name": "axe",
-      "violations": [],
-      "ok": true
-    },
-    {
-      "name": "reduced motion",
-      "bodyState": "still",
+      "name": "reduced motion collapses the hero to one viewport",
+      "ok": true,
+      "state": "still",
       "heroHeight": 900,
-      "viewport": 900,
-      "frame": "assets/reel/ezgif-frame-021.jpg",
-      "rangeHeight": 1338.265625,
-      "ok": true
+      "viewport": 900
     },
     {
-      "name": "mobile layout",
+      "name": "no-JS: static prices intact",
+      "ok": true,
+      "prices": [
+        "R17",
+        "R22",
+        "R55"
+      ],
+      "hours": 3,
+      "address": 89,
+      "directOrders": 3,
+      "summaryHidden": true,
+      "tel": "tel:+27818592919"
+    },
+    {
+      "name": "no-JS: full hours, address and click-to-call intact",
+      "ok": true,
+      "prices": [
+        "R17",
+        "R22",
+        "R55"
+      ],
+      "hours": 3,
+      "address": 89,
+      "directOrders": 3,
+      "summaryHidden": true,
+      "tel": "tel:+27818592919"
+    },
+    {
+      "name": "no-JS: a direct WhatsApp link per product",
+      "ok": true,
+      "prices": [
+        "R17",
+        "R22",
+        "R55"
+      ],
+      "hours": 3,
+      "address": 89,
+      "directOrders": 3,
+      "summaryHidden": true,
+      "tel": "tel:+27818592919"
+    },
+    {
+      "name": "no-JS: the quantity builder is absent, not broken",
+      "ok": true,
+      "prices": [
+        "R17",
+        "R22",
+        "R55"
+      ],
+      "hours": 3,
+      "address": 89,
+      "directOrders": 3,
+      "summaryHidden": true,
+      "tel": "tel:+27818592919"
+    },
+    {
+      "name": "no horizontal overflow at 390",
+      "ok": true,
       "pageWidth": 390,
       "viewportWidth": 390,
-      "minTarget": 44,
-      "ok": true
+      "minTarget": 44
+    },
+    {
+      "name": "all tap targets at least 44px",
+      "ok": true,
+      "pageWidth": 390,
+      "viewportWidth": 390,
+      "minTarget": 44
     }
   ],
   "errors": []
