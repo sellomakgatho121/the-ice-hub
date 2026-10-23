@@ -7,49 +7,39 @@
  * rasterised before it is faded in, so a frame can never paint late or flash.
  */
 
-const TOTAL = 48;
+const TOTAL = 30;
 const PAD = 3;
 const FRAME = (n) => `assets/reel/frame-${String(n).padStart(PAD, "0")}.webp`;
 
 /* Beat frame ranges, mapped to the animation rather than to arithmetic.
  *
- * The reel MERGES two clips the owner supplied as one continuous 15s sequence:
+ * SINGLE CLIP. The owner chose video 1 alone at its native 1280x720 over the
+ * two-clip merge, so there is no seam anywhere in this reel: every one of the
+ * 29 transitions crossfades. Source is 8s / 192 native frames at 24fps — the
+ * bag holds still, tilts, bursts at ~3.0s, then tumbles.
  *
- *   reel frames  1-25  = video 1 frames   1-168   (0.0-7.0s, 1280x720 source)
- *   reel frames 26-48  = video 2 frames   1-192   (7.0-15.0s,  640x360 source)
+ *   1-8   source  1-47    0.0-1.9s  bag at rest, hero statement
+ *   9-11  source 54-72    2.2-3.0s  the tilt
+ *   12-15 source 79-93    3.2-3.8s  the burst
+ *   16-30 source 100-192  4.1-7.9s  tumble, handing off to the Counter
  *
- * Video 1 holds the bag still, tilts, bursts at ~3.0s, then tumbles.
- * Video 2 continues that tumble: ice cascading, the bag rising out of frame,
- * and the pile settling to a stop. Their motion profiles are complementary -
- * video 1 accelerates out (0.2 -> 5.8), video 2 decelerates in (5.2 -> 0.4).
- *
- * The two clips share NO overlapping frame: the closest any video 2 frame gets
- * to any video 1 frame is 7.6x an in-sequence step, where true overlap would be
- * ~0. The join is therefore a real discontinuity and is handled as a cut.
- *
- * Density is the governing constraint:
- * px/frame = (heroVh - 100)/100 * viewportHeight / 48. At 180svh that is
- * ~15 px/frame, inside the comfortable 15-20 band.
+ * Density, not frame count, governs perceived smoothness:
+ * px/frame = (heroVh - 100)/100 * viewportHeight / 30. At 150svh that is
+ * ~15 px/frame, the same density the previous 48-frame 360p reel had at
+ * 180svh. The shorter runway is what buys the pixels-per-frame; dropping to 30
+ * frames cost nothing provided the hero came down with it.
  */
 const BEATS = [
-  [1, 7],
-  [8, 14],
-  [15, 25],
-  [26, 48],
+  [1, 8],
+  [9, 11],
+  [12, 15],
+  [16, 30],
 ];
 
-/* The seam between the two clips.
- *
- * Cutting video 1 at frame 168 and starting video 2 at frame 1 is the
- * smoothest available join, measured at 6.64x the mean in-sequence step. For
- * scale the previous ice clip's deliberate cut measured 2.9x its own mean, so
- * this seam is well over twice as violent as an ordinary edit. It is placed
- * exactly on the beat 3/4 boundary and swapped WITHOUT a crossfade, so it
- * reads as an edit rather than a stutter. Every other transition dissolves.
- *
- * Set to 0 if a future clip has no internal discontinuity.
- */
-const CUT_AFTER = 25;
+/* No cut to handle — this reel is one continuous clip. Kept at 0 so that
+   restoring a multi-clip reel is a one-line change; see extract-video1-720p.sh
+   and the superseded incoming/extract-reel-frames.sh. */
+const CUT_AFTER = 0;
 
 const hero = document.querySelector("[data-hero]");
 const layers = [...document.querySelectorAll("[data-reel-layer]")];
@@ -177,12 +167,14 @@ function setReducedState(reduced) {
 }
 
 // Metered connections are common in Tembisa: warm sparsely, never the full run.
+/* The sparse list must stay inside [1, TOTAL]: 34 and 48 were the 48-frame
+   reel's anchors and fetched files that no longer belong to the set. */
 if (!saveData && !slowConnection) {
-  [1, 2, 8, 15, 22, 26, 34, 48].forEach(warm);
+  [1, 2, 8, 15, 22, 26].forEach(warm);
   if ("requestIdleCallback" in window) requestIdleCallback(() => warmAll(), { timeout: 2000 });
   else setTimeout(() => warmAll(), 500);
 } else {
-  [1, 48].forEach(warm);
+  [1, TOTAL].forEach(warm);
 }
 
 window.addEventListener("scroll", queuePaint, { passive: true });

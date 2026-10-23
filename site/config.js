@@ -45,12 +45,13 @@ export const SHOP = {
   deliveryClaim: "Free delivery around Tembisa",
 
   // Prices from the pricing flyer effective 20 May 2026.
+  // Bulk tier raised by the owner from 20 bags to 30; the flyer still says 20.
   // stockPrice applies to the WHOLE line once quantity reaches stockThreshold.
   products: [
     { id: "cubes-2kg", name: "2 kg ice cubes", messageName: "2 kg ice-cube bag",
-      standardPrice: 17, stockPrice: 10, stockThreshold: 20, use: "Everyday" },
+      standardPrice: 17, stockPrice: 10, stockThreshold: 30, use: "Everyday" },
     { id: "cubes-3kg", name: "3 kg ice cubes", messageName: "3 kg ice-cube bag",
-      standardPrice: 22, stockPrice: 12, stockThreshold: 20, use: "Events" },
+      standardPrice: 22, stockPrice: 12, stockThreshold: 30, use: "Events" },
     { id: "block-30kg", name: "30 kg ice block", messageName: "30 kg ice block",
       standardPrice: 55, stockPrice: null, stockThreshold: null, use: "Venues" },
   ],

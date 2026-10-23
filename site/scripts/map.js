@@ -65,10 +65,13 @@ function showFrame(panel, position) {
   frame.src = embedUrl(position);
   frame.loading = "lazy";
   frame.referrerPolicy = "no-referrer-when-downgrade";
+  panel.setAttribute("aria-busy", "true");
   panel.replaceChildren(frame);
   panel.hidden = false;
   panel.removeAttribute("aria-hidden");
   panel.setAttribute("data-loaded", "");
+  // iframes fire load even on error pages, so clearing busy here is safe.
+  frame.addEventListener("load", () => panel.setAttribute("aria-busy", "false"));
 }
 
 const panel = document.querySelector("[data-map]");
