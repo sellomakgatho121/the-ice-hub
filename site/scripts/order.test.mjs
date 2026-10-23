@@ -10,11 +10,17 @@ import {
 
 const byId = Object.fromEntries(SHOP.products.map((p) => [p.id, p]));
 
-test("bag pricing switches to stock for the whole line at 20", () => {
-  assert.equal(getUnitPrice(byId["cubes-2kg"], 19), 17);
-  assert.equal(getUnitPrice(byId["cubes-2kg"], 20), 10);
-  assert.equal(getUnitPrice(byId["cubes-3kg"], 19), 22);
-  assert.equal(getUnitPrice(byId["cubes-3kg"], 20), 12);
+test("bag pricing switches to stock for the whole line at 30", () => {
+  assert.equal(getUnitPrice(byId["cubes-2kg"], 29), 17);
+  assert.equal(getUnitPrice(byId["cubes-2kg"], 30), 10);
+  assert.equal(getUnitPrice(byId["cubes-3kg"], 29), 22);
+  assert.equal(getUnitPrice(byId["cubes-3kg"], 30), 12);
+});
+
+test("the bulk threshold is 30 on every bag SKU and absent on the block", () => {
+  assert.equal(byId["cubes-2kg"].stockThreshold, 30);
+  assert.equal(byId["cubes-3kg"].stockThreshold, 30);
+  assert.equal(byId["block-30kg"].stockThreshold, null);
 });
 
 test("the 30 kg block has no stock tier", () => {
@@ -25,17 +31,17 @@ test("the 30 kg block has no stock tier", () => {
 
 test("mixed order applies stock pricing and totals correctly", () => {
   const summary = calculateOrder(SHOP.products, {
-    "cubes-2kg": 20,
+    "cubes-2kg": 30,
     "cubes-3kg": 0,
     "block-30kg": 2,
   });
-  assert.equal(summary.itemCount, 22);
-  assert.equal(summary.total, 310);
+  assert.equal(summary.itemCount, 32);
+  assert.equal(summary.total, 410);
   assert.deepEqual(
     summary.lines.map(({ product, quantity, unitPrice, lineTotal }) =>
       ({ id: product.id, quantity, unitPrice, lineTotal })),
     [
-      { id: "cubes-2kg", quantity: 20, unitPrice: 10, lineTotal: 200 },
+      { id: "cubes-2kg", quantity: 30, unitPrice: 10, lineTotal: 300 },
       { id: "block-30kg", quantity: 2, unitPrice: 55, lineTotal: 110 },
     ],
   );
@@ -43,8 +49,8 @@ test("mixed order applies stock pricing and totals correctly", () => {
 });
 
 test("one bag short of the threshold stays on standard pricing", () => {
-  const summary = calculateOrder(SHOP.products, { "cubes-2kg": 19 });
-  assert.equal(summary.total, 19 * 17);
+  const summary = calculateOrder(SHOP.products, { "cubes-2kg": 29 });
+  assert.equal(summary.total, 29 * 17);
   assert.equal(summary.lines[0].stockApplied, false);
 });
 
@@ -64,14 +70,14 @@ test("fractional quantities truncate rather than bill partially", () => {
 });
 
 test("the message labels totals as estimates and requests fulfillment details", () => {
-  const summary = calculateOrder(SHOP.products, { "cubes-2kg": 20, "block-30kg": 2 });
+  const summary = calculateOrder(SHOP.products, { "cubes-2kg": 30, "block-30kg": 2 });
   assert.equal(buildWhatsAppMessage(summary), [
     "Hello The Ice Hub, I would like to order:",
     "",
-    "• 20 × 2 kg ice-cube bags at R10 each",
+    "• 30 × 2 kg ice-cube bags at R10 each",
     "• 2 × 30 kg ice blocks at R55 each",
     "",
-    "Estimated total: R310",
+    "Estimated total: R410",
     "",
     "Delivery or collection: please confirm",
     "Delivery address: please add",

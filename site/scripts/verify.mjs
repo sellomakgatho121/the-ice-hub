@@ -102,15 +102,15 @@ for (const [index, fraction] of [0, 0.2, 0.4, 0.6, 0.8, 1].entries()) {
   await page.screenshot({ path: path.join(OUT, `hero-${String(index + 1).padStart(2, "0")}.png`) });
 }
 step("hero scrub shows distinct frames", new Set(seen).size >= 5, { frames: seen, distinct: new Set(seen).size });
-/* Frames are zero-padded to 3 digits (001-048), so the range is checked
+/* Frames are zero-padded to 3 digits (001-030), so the range is checked
    numerically. A regex assuming 2 digits silently rejected frame-001. */
 const reelIndex = (src) => {
   const m = /^assets\/reel\/frame-(\d{3})\.webp$/.exec(src ?? "");
   return m ? Number(m[1]) : null;
 };
 const reelIndices = seen.map(reelIndex);
-step("frames stay inside the 48-frame reel",
-  reelIndices.every((n) => n !== null && n >= 1 && n <= 48), { frames: seen, indices: reelIndices });
+step("frames stay inside the 30-frame reel",
+  reelIndices.every((n) => n !== null && n >= 1 && n <= 30), { frames: seen, indices: reelIndices });
 step("exactly one reel layer is frontmost", await page.evaluate(() => {
   const front = [...document.querySelectorAll("[data-reel-layer]")].filter((n) => n.classList.contains("is-front"));
   const layers = document.querySelectorAll("[data-reel-layer]");
@@ -139,31 +139,51 @@ const runtime = await page.evaluate(() => ({
   viewportWidth: document.documentElement.clientWidth,
   fonts: document.fonts.status,
   cards: document.querySelectorAll("[data-product-card]").length,
-  frames: performance.getEntriesByType("resource").filter((e) => /assets\/reel\/frame-/.test(e.name)).length,
-  canvas: Boolean(document.querySelector("canvas")),
+  /* The two-layer reel fetches frame-001 through both <img> layers as well as
+     the script's warm-up, so resource ENTRIES exceed the set (32 vs 30). The
+     budget is on distinct frame files, which is the invariant the 30-frame
+     contract actually owns. */
+  frameSet: [...new Set(performance.getEntriesByType("resource")
+    .map((e) => (/assets\/reel\/frame-(\d{3})\.webp$/.exec(e.name) ?? [])[1])
+    .filter(Boolean))],
 }));
 step("three product cards, no canvas, no WebGL", runtime.cards === 3 && !runtime.canvas, runtime);
 step("no horizontal overflow at 1440", runtime.pageWidth <= runtime.viewportWidth, runtime);
 step("fonts loaded", runtime.fonts === "loaded", { fonts: runtime.fonts });
-step("reel frame count within the set", runtime.frames <= 48, { frames: runtime.frames });
+step("reel frame count within the set", runtime.frameSet.length <= 30, { frames: runtime.frameSet.length });
 
 /* Zero third-party requests on load is the strictest rule in the contract. */
 step("no third-party request on load", thirdParty.length === 0, { thirdParty });
 
-/* ---- commerce: steppers, live total, and the bulk-threshold announcement */
+/* ---- commerce: steppers, live total, and the bulk-threshold announcement.
+ * The owner raised the bulk threshold from 20 bags to 30, so the crossing is
+ * now 29 -> 30: at 29 the line must still bill standard price, and one more
+ * bag must flip it to stock price and announce politely. Both sides of the
+ * boundary are asserted, so a threshold regression in either direction is
+ * caught in the browser, not just in the unit tests. */
 const addButtons = page.locator('[data-step="1"]');
-for (let i = 0; i < 20; i += 1) await addButtons.nth(0).click();
+for (let i = 0; i < 29; i += 1) await addButtons.nth(0).click();
 await page.waitForTimeout(120);
-const at20 = await page.evaluate(() => ({
+const at29 = await page.evaluate(() => ({
   price: document.querySelector('[data-product="cubes-2kg"] [data-price]')?.textContent,
   total: document.querySelector("[data-summary-total]")?.textContent,
   announced: document.querySelector("[data-order-announce]")?.textContent ?? "",
   summaryHidden: document.querySelector("[data-summary]")?.hidden,
 }));
-step("20 bags drop the whole line to stock price", at20.price === "R10", at20);
-step("live total updates", at20.total === "R200", at20);
-step("threshold crossing is announced politely", /stock price/i.test(at20.announced), at20);
-step("summary visible once items exist", at20.summaryHidden === false, at20);
+step("29 bags still bill standard price", at29.price === "R17" && at29.total === "R493", at29);
+step("no stock-price announcement before the threshold", !/stock price/i.test(at29.announced), at29);
+step("summary visible once items exist", at29.summaryHidden === false, at29);
+
+await addButtons.nth(0).click();
+await page.waitForTimeout(120);
+const at30 = await page.evaluate(() => ({
+  price: document.querySelector('[data-product="cubes-2kg"] [data-price]')?.textContent,
+  total: document.querySelector("[data-summary-total]")?.textContent,
+  announced: document.querySelector("[data-order-announce]")?.textContent ?? "",
+}));
+step("30 bags drop the whole line to stock price", at30.price === "R10", at30);
+step("live total updates", at30.total === "R300", at30);
+step("threshold crossing is announced politely", /stock price/i.test(at30.announced), at30);
 
 const waHref = await page.locator("[data-summary-cta]").getAttribute("href");
 step("WhatsApp handoff encodes the order",
@@ -171,9 +191,9 @@ step("WhatsApp handoff encodes the order",
 
 /* Quantity floors at zero. The decrement control is disabled at zero by
    design, so the floor must be asserted as state, not by clicking a dead
-   button. Starting from 20, exactly 20 decrements must reach the floor and
+   button. Starting from 30, exactly 30 decrements must reach the floor and
    disable the control again. */
-for (let i = 0; i < 20; i += 1) await page.locator('[data-step="-1"]').nth(0).click();
+for (let i = 0; i < 30; i += 1) await page.locator('[data-step="-1"]').nth(0).click();
 await page.waitForTimeout(120);
 const atZero = await page.evaluate(() => ({
   qty: document.querySelector('[data-qty="cubes-2kg"]')?.textContent,
