@@ -4,9 +4,7 @@ The website for The Ice Hub, a local ice supplier in Tembisa, South Africa. The 
 
 ## Project status
 
-The deployable site in [`site/`](site/) is the existing editorial prototype. It uses a 40-frame scroll-controlled product film, a procedural Three.js scene, an opt-in OpenStreetMap embed, live South African opening status, and a Web3Forms preorder form in demo mode.
-
-A complete redesign has been approved but is not yet implemented. The target experience removes Three.js and Web3Forms, keeps the reel as the main cinematic element, exposes the real catalog and pricing, and lets customers build an estimated order before continuing in WhatsApp.
+The deployable site in [`site/`](site/) implements the approved redesign. It uses a 30-frame scroll-controlled product film at 720p, token-based glass materials, a WhatsApp order builder with live totals and bulk pricing, an opt-in OpenStreetMap embed, and live South African opening status. Three.js and Web3Forms have been removed.
 
 - [Approved redesign specification](docs/superpowers/specs/2026-09-22-ice-hub-redesign-design.md)
 - [Task-by-task implementation plan](docs/superpowers/plans/2026-09-22-cinematic-whatsapp-storefront.md)
@@ -25,11 +23,11 @@ A complete redesign has been approved but is not yet implemented. The target exp
 
 | Product | Standard price | Stock price |
 | --- | ---: | ---: |
-| 2 kg ice-cube bag | R17 | R10 each for 20 or more bags |
-| 3 kg ice-cube bag | R22 | R12 each for 20 or more bags |
+| 2 kg ice-cube bag | R17 | R10 each for 30 or more bags |
+| 3 kg ice-cube bag | R22 | R12 each for 30 or more bags |
 | 30 kg ice block | R55 | Not applicable |
 
-These prices are taken from the shop's pricing flyer effective 20 May 2026.
+These prices are taken from the shop's pricing flyer effective 20 May 2026. The owner subsequently raised the bulk threshold from 20 bags to 30.
 
 ## Repository structure
 
