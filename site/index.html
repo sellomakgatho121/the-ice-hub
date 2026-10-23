@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Ice Hub — Raymond Mhlaba Street, Tembisa</title>
-<meta name="description" content="Ice in Tembisa. 2 kg and 3 kg bags from R17, 30 kg blocks at R55. 20+ bags drop to stock price. Free delivery around Tembisa." />
+<meta name="description" content="Ice in Tembisa. 2 kg and 3 kg bags from R17, 30 kg blocks at R55. 30+ bags drop to stock price. Free delivery around Tembisa." />
 <meta name="theme-color" content="#05090C" />
 <link rel="preload" as="font" type="font/woff2" href="fonts/BodoniModa-latin-var.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="fonts/Manrope-latin-var.woff2" crossorigin />
@@ -12,9 +12,54 @@
 <link rel="stylesheet" href="styles.css" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="manifest" href="manifest.webmanifest" />
+<script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+
+<!-- Inline SVG defs for the lens tier: a gradient displacement map the
+     Chromium backdrop-filter feeds through feDisplacementMap. Neutral grey
+     at the centre (zero displacement), pushing toward the blue-green corner
+     at the rim, so the backdrop bends outward at every glass edge and stays
+     true at the centre. No request, no WebGL. -->
+<svg width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="lg-lens" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feImage result="ramp" preserveAspectRatio="none" x="0" y="0" width="100%" height="100%"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3CradialGradient id='m' cx='50%25' cy='50%25' r='72%25'%3E%3Cstop offset='58%25' stop-color='rgb(128,128,128)'/%3E%3Cstop offset='100%25' stop-color='rgb(105,151,178)'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23m)'/%3E%3C/svg%3E" />
+      <feDisplacementMap in="SourceGraphic" in2="ramp" scale="26" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+</svg>
+
+<!-- Drifting ghost words and icons. Behind every glass surface, so the
+     refraction has real content to refract. Decorative only. -->
+<div class="field" aria-hidden="true">
+  <div class="field__track" data-field-track>
+    <span class="field__word">ICE</span>
+    <svg class="field__icon"><use href="icons.svg#snowflake"></use></svg>
+    <span class="field__word">Tembisa</span>
+    <svg class="field__icon"><use href="icons.svg#droplet"></use></svg>
+    <span class="field__word">COLD</span>
+    <svg class="field__icon"><use href="icons.svg#box"></use></svg>
+    <span class="field__word">Raymond</span>
+    <svg class="field__icon"><use href="icons.svg#package"></use></svg>
+    <span class="field__word">HUB</span>
+    <svg class="field__icon"><use href="icons.svg#weight"></use></svg>
+    <span class="field__word">FROZEN</span>
+    <svg class="field__icon"><use href="icons.svg#truck"></use></svg>
+    <span class="field__word">Delivery</span>
+    <svg class="field__icon"><use href="icons.svg#shield-check"></use></svg>
+    <span class="field__word">Zone 4</span>
+    <svg class="field__icon"><use href="icons.svg#snowflake"></use></svg>
+    <span class="field__word">BAGS</span>
+    <svg class="field__icon"><use href="icons.svg#box"></use></svg>
+    <span class="field__word">R17</span>
+    <svg class="field__icon"><use href="icons.svg#weight"></use></svg>
+    <span class="field__word">Blocks</span>
+    <svg class="field__icon"><use href="icons.svg#package"></use></svg>
+  </div>
+</div>
 
 <header class="header" data-header>
   <div class="header__inner shell">
@@ -43,9 +88,9 @@
 
       <div class="hero__media grain">
         <img id="reel-img" class="hero__reel is-front" src="assets/reel/frame-001.webp" alt=""
-             width="640" height="360" decoding="async" fetchpriority="high" data-reel-layer />
+             width="1280" height="720" decoding="async" fetchpriority="high" data-reel-layer />
         <img class="hero__reel" src="assets/reel/frame-001.webp" alt=""
-             width="640" height="360" decoding="async" aria-hidden="true" data-reel-layer />
+             width="1280" height="720" decoding="async" aria-hidden="true" data-reel-layer />
         <div class="hero__veil" aria-hidden="true"></div>
       </div>
 
@@ -54,18 +99,12 @@
         <div class="hero__beat" data-beat="1" data-active>
           <h1 class="hero__statement" id="hero-statement">Below freezing, on Raymond Mhlaba Street.</h1>
           <p class="hero__sub">Ice in Tembisa from R17 a bag. Free delivery around Tembisa, and the shop is open six days a week.</p>
-          <p class="hero__meta">
-            <svg aria-hidden="true" focusable="false"><use href="icons.svg#snowflake"></use></svg>
-            <span data-frame-index>01</span>
-            <svg aria-hidden="true" focusable="false"><use href="icons.svg#arrow-right"></use></svg>
-            <span data-frame-total>48</span>
-          </p>
         </div>
 
         <!-- Beat 2 — Compression. -->
         <div class="hero__beat" data-beat="2">
-          <p class="hero__line">From one bag to twenty.</p>
-          <p class="hero__sub">R17 for a 2 kg bag, R22 for a 3 kg. At twenty bags or more the whole line drops to stock price — R10 and R12.</p>
+          <p class="hero__line">From one bag to thirty.</p>
+          <p class="hero__sub">R17 for a 2 kg bag, R22 for a 3 kg. At thirty bags or more the whole line drops to stock price — R10 and R12.</p>
         </div>
 
         <!-- Beat 3 — Release. The hard cut in the source footage falls on this
@@ -91,12 +130,12 @@
        Prices are the largest thing here. The hairline carries separation. -->
   <section class="counter-surface" id="products" aria-labelledby="products-title">
     <div class="shell">
-      <p class="eyebrow">Prices effective 20 May 2026</p>
-      <h2 id="products-title">Buy ice</h2>
+      <p class="eyebrow js-reveal">Prices effective 20 May 2026</p>
+      <h2 id="products-title" class="js-reveal">Buy ice</h2>
 
       <ul class="products">
 
-        <li class="product counter-card" data-product-card data-product="cubes-2kg">
+        <li class="product counter-card grain js-reveal" data-product-card data-product="cubes-2kg">
           <div class="product__head">
             <h3 class="product__name">2 kg ice cubes</h3>
             <p class="product__price"><span data-price>R17</span></p>
@@ -105,7 +144,7 @@
             <svg class="icon" aria-hidden="true" focusable="false"><use href="icons.svg#box"></use></svg>
             Everyday
           </p>
-          <p class="product__note" data-stock-note>20 or more drops to R10 a bag.</p>
+          <p class="product__note" data-stock-note>30 or more drops to R10 a bag.</p>
 
           <div class="stepper">
             <button class="stepper__btn" type="button" data-step="-1" data-product="cubes-2kg" aria-label="One fewer 2 kg bag">
@@ -117,10 +156,10 @@
             </button>
           </div>
 
-          <a class="button" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%202%20kg%20ice-cube%20bags." rel="noopener" data-direct-order>Order by WhatsApp</a>
+          <a class="button liquid" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%202%20kg%20ice-cube%20bags." rel="noopener" data-direct-order>Order by WhatsApp</a>
         </li>
 
-        <li class="product counter-card" data-product-card data-product="cubes-3kg">
+        <li class="product counter-card grain js-reveal" data-product-card data-product="cubes-3kg">
           <div class="product__head">
             <h3 class="product__name">3 kg ice cubes</h3>
             <p class="product__price"><span data-price>R22</span></p>
@@ -129,7 +168,7 @@
             <svg class="icon" aria-hidden="true" focusable="false"><use href="icons.svg#box"></use></svg>
             Events
           </p>
-          <p class="product__note" data-stock-note>20 or more drops to R12 a bag.</p>
+          <p class="product__note" data-stock-note>30 or more drops to R12 a bag.</p>
 
           <div class="stepper">
             <button class="stepper__btn" type="button" data-step="-1" data-product="cubes-3kg" aria-label="One fewer 3 kg bag">
@@ -141,10 +180,10 @@
             </button>
           </div>
 
-          <a class="button" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%203%20kg%20ice-cube%20bags." rel="noopener" data-direct-order>Order by WhatsApp</a>
+          <a class="button liquid" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%203%20kg%20ice-cube%20bags." rel="noopener" data-direct-order>Order by WhatsApp</a>
         </li>
 
-        <li class="product counter-card" data-product-card data-product="block-30kg">
+        <li class="product counter-card grain js-reveal" data-product-card data-product="block-30kg">
           <div class="product__head">
             <h3 class="product__name">30 kg ice block</h3>
             <p class="product__price"><span data-price>R55</span></p>
@@ -165,7 +204,7 @@
             </button>
           </div>
 
-          <a class="button" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%2030%20kg%20ice%20blocks." rel="noopener" data-direct-order>Order by WhatsApp</a>
+          <a class="button liquid" href="https://wa.me/27818592919?text=Hello%20The%20Ice%20Hub%2C%20I%20would%20like%20to%20order%2030%20kg%20ice%20blocks." rel="noopener" data-direct-order>Order by WhatsApp</a>
         </li>
 
       </ul>
@@ -177,25 +216,25 @@
        Prose-led, figure-led, and list-led. -->
   <section class="audience" id="delivery" aria-labelledby="audience-title">
     <div class="shell">
-      <p class="audience__eyebrow">Who buys from us</p>
-      <h2 id="audience-title">Ice for the week, the function, and the floor</h2>
+      <p class="audience__eyebrow js-reveal">Who buys from us</p>
+      <h2 id="audience-title" class="js-reveal">Ice for the week, the function, and the floor</h2>
 
       <div class="audience__grid">
 
-        <article class="audience__card--prose etched">
+        <article class="audience__card--prose glass js-reveal">
           <p class="audience__eyebrow">Everyday</p>
           <h3 class="audience__title">A bag before work</h3>
           <p class="audience__body">Most people buy on the way past. Two kilos fills a cooler for a long day; three is still the better rate if you are throwing a braai.</p>
         </article>
 
-        <article class="audience__card--figure etched">
+        <article class="audience__card--figure glass js-reveal">
           <p class="audience__eyebrow">Events</p>
           <p class="audience__figure">R10</p>
-          <h3 class="audience__title">Twenty bags or more</h3>
-          <p class="audience__body">The stock price applies to the whole line once you reach twenty, not just the bags past it. Order it in one message.</p>
+          <h3 class="audience__title">Thirty bags or more</h3>
+          <p class="audience__body">The stock price applies to the whole line once you reach thirty, not just the bags past it. Order it in one message.</p>
         </article>
 
-        <article class="audience__card--list etched">
+        <article class="audience__card--list glass js-reveal">
           <p class="audience__eyebrow">Venues</p>
           <h3 class="audience__title">Standing orders</h3>
           <ul class="audience__rules">
@@ -215,8 +254,8 @@
   <section class="visit counter-surface" id="visit" aria-labelledby="visit-title">
     <div class="shell visit__grid">
       <div>
-        <p class="eyebrow">Where we are</p>
-        <h2 id="visit-title">Come through</h2>
+        <p class="eyebrow js-reveal">Where we are</p>
+        <h2 id="visit-title" class="js-reveal">Come through</h2>
 
         <p class="status" aria-live="polite">
           <span class="status__dot" aria-hidden="true"></span>
@@ -261,22 +300,24 @@
 
 <!-- Order summary: hidden at zero items. Fixed Glass panel on desktop,
      bottom bar with safe-area inset on mobile. -->
-<aside class="summary glass" data-summary hidden aria-label="Your order">
+<aside class="summary glass grain" data-summary hidden aria-label="Your order">
   <ul class="summary__lines" data-summary-lines></ul>
   <p class="summary__total">
     <span>Estimated total</span>
     <strong data-summary-total>R0</strong>
   </p>
-  <a class="cta" href="https://wa.me/27818592919" rel="noopener" data-summary-cta>Send order on WhatsApp</a>
+  <a class="cta liquid" href="https://wa.me/27818592919" rel="noopener" data-summary-cta>Send order on WhatsApp</a>
 </aside>
 
 <p class="sr-only" role="status" aria-live="polite" data-order-announce></p>
 
 <script type="module" src="config.js"></script>
 <script type="module" src="scripts/nav.js"></script>
+<script type="module" src="scripts/field.js"></script>
 <script type="module" src="scripts/reel.js"></script>
 <script type="module" src="scripts/hours.js"></script>
 <script type="module" src="scripts/order-ui.js"></script>
 <script type="module" src="scripts/map.js"></script>
+<script type="module" src="scripts/reveal.js"></script>
 </body>
 </html>

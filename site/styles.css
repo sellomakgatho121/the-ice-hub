@@ -48,8 +48,12 @@
   --counter-card: #FFFFFF;
   --counter-hair: rgb(10 20 27 / 12%);
   --counter-ink: #0A141B;
-  --counter-mute: #556E7A;
-  --counter-link: #0F5A73;
+  /* The two inks on the translucent counter. 72% white over the abyss is the
+     darkest face they can sit on (#B0B4B6), and both are tuned for that
+     floor: mute clears 4.77:1, link 5.04:1, so every slate pair on the face
+     clears 4.5:1 no matter what drifts behind the glass. */
+  --counter-mute: #294652;
+  --counter-link: #0B4457;
 
   /* ink on dark */
   --frost: #FFFFFF;
@@ -58,14 +62,96 @@
   --refract: #6FD3EA;
   --amber: #E0A45C;
 
-  /* glass */
-  --glass-fill: rgb(255 255 255 / 7%);
+  /* glass — raised transparency and refraction for the liquid-glass pass */
+  --glass-fill: rgb(255 255 255 / 5%);
   --glass-fallback: rgb(18 34 44 / 94%);
-  --glass-entry: rgb(255 255 255 / 22%);
-  --glass-exit: rgb(180 214 226 / 16%);
+  --glass-entry: rgb(255 255 255 / 30%);
+  --glass-exit: rgb(180 214 226 / 18%);
   --glass-shadow: 0 24px 64px -12px rgb(2 12 20 / 60%);
-  --glass-blur: 20px;
-  --glass-sat: 120%;
+  --glass-blur: 28px;
+  --glass-sat: 165%;
+  /* Specular sheen along the top edge. The liquid-glass brief supersedes the
+     "no gradient on glass" rule in section 2; it reads as a highlight ray,
+     not a directional key light. */
+  --glass-sheen: rgb(255 255 255 / 16%);
+
+  /* counter surface, translucent so the drifting field shows through it.
+     72% is the floor the glass pass was computed against: --counter-mute
+     resolves 4.85:1 against this face with the abyss behind it, and the
+     drifting field is the only thing aloud to move under the copy. */
+  --counter-translucent: rgb(242 246 248 / 72%);
+
+  /* drifting field ink. Faint, but loud enough that the 72% counter face and
+     the blurred glass components have real geometry to refract. */
+  --field-ink: rgb(255 255 255 / 6%);
+  --field-ink-strong: rgb(111 211 234 / 12%);
+
+  /* bright glass — the Regular widget material for the counter zone. On the
+     one-canvas build the card IS the light source: 72% face over the abyss
+     composites to #B0B4B6, the exact floor --counter-mute/--counter-link
+     were tuned against, so the pairs hold without a bright section behind. */
+  --glass-face-bright: rgb(242 246 248 / 72%);
+  --glass-entry-bright: rgb(255 255 255 / 60%);
+  --glass-exit-bright: rgb(10 20 27 / 12%);
+  --glass-face-bright-hover: rgb(242 246 248 / 76%);
+  --glass-face-bright-active: rgb(242 246 248 / 80%);
+  --glass-liquid-face: rgb(255 255 255 / 22%);
+  --glass-liquid-face-hover: rgb(255 255 255 / 28%);
+  --glass-liquid-face-active: rgb(255 255 255 / 18%);
+  --glass-secondary: rgb(18 34 44 / 11%);
+  --glass-secondary-hover: rgb(18 34 44 / 15%);
+  --ink-well: rgb(10 20 27 / 6%);
+
+  /* dark glass — stage and panel faces on the ink side of the site */
+  --glass-stage-dark: rgb(18 34 44 / 45%);
+  --glass-stage-dark-hover: rgb(18 34 44 / 55%);
+  --glass-face-dark: rgb(18 34 44 / 88%);
+  --glass-entry-dark: rgb(255 255 255 / 22%);
+  --glass-exit-dark: rgb(2 12 20 / 35%);
+
+  /* amber glass — the order CTA material; carries its own shadow tint */
+  --amber-glass: rgb(224 164 92 / 82%);
+  --amber-glass-hover: rgb(224 164 92 / 92%);
+  --amber-glass-active: rgb(224 164 92 / 88%);
+  --amber-sheen: rgb(255 255 255 / 28%);
+  --amber-shadow: 0 24px 56px -16px rgb(224 164 92 / 35%);
+  --amber-glass-blur: 14px;
+
+  /* counter stage optics — what the translucent face does to whatever
+     drifts behind it */
+  --counter-sat: 115%;
+  --counter-blur: 24px;
+
+  /* glass rims — the 1px hairlines that trace the two edges */
+  --glass-rim-bright: rgb(255 255 255 / 45%);
+  --glass-rim-dark: rgb(10 20 27 / 18%);
+  --glass-rim-amber: rgb(255 244 230 / 55%);
+
+  /* chrome glass — the Clear lane: capsules and controls that float above the
+     canvas. Wispy fill, hard rim pair, one blur; progress thickens the face
+     as content scrolls beneath it (the scroll edge effect). */
+  --chrome-fill: rgb(255 255 255 / 9%);
+  --chrome-fill-hover: rgb(255 255 255 / 14%);
+  --chrome-face: rgb(10 22 30 / 74%);
+  --chrome-entry: rgb(255 255 255 / 36%);
+  --chrome-exit: rgb(180 214 226 / 14%);
+  --chrome-hair: rgb(255 255 255 / 10%);
+  --chrome-blur: 22px;
+
+  /* lens — the SVG displacement pipeline id applied on the Chromium tier */
+  --lens-id: url("#lg-lens");
+  --lens-bright: 1.05;
+  --lens-sat: 138%;
+
+  /* specular — one environment light that every glass silhouette chases */
+  --spec-x: 30%;
+  --spec-y: 6%;
+  --spec-glint: rgb(255 255 255 / 26%);
+  --spec-glint-soft: rgb(255 255 255 / 10%);
+
+  /* thick glass — the flex state: deeper shadow, stronger lens, like a
+     bigger surface of the same material */
+  --glass-shadow-thick: 0 36px 92px -18px rgb(2 12 20 / 72%);
 
   /* etched */
   --etched-fill: rgb(18 34 44 / 55%);
@@ -114,10 +200,12 @@
   --space-2xl: 6.5rem;
   --space-3xl: 10rem;
 
-  /* radii — 16px is the glassmorphism default and is banned */
+  /* radii — 16px is the glassmorphism default and is banned. The capsule
+     ladder nests concentrically: pills for chrome controls, xl for cards. */
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
+  --radius-xl: 26px;
   --radius-pill: 999px;
 
   /* motion */
@@ -150,11 +238,14 @@
   --z-skip: 50;
 }
 
-/* counter surface re-declares scheme so controls and scrollbars read light */
+/* The counter section is mineral now — one dark canvas for the whole page,
+   luminance carried by the materials instead of background flips. The bright
+   lane survives ONLY inside the product cards, which keeps every proven
+   ink-on-face pair. */
 .counter-surface {
-  color-scheme: light;
-  background: var(--counter);
-  color: var(--counter-ink);
+  color-scheme: dark;
+  background: transparent;
+  color: var(--frost);
 }
 
 /* ================================================================== reset */
@@ -209,16 +300,11 @@ em { font-style: normal; color: var(--refract); }
   color: var(--refract);
   text-underline-offset: 0.2em;
 }
-.counter-surface :where(a) { color: var(--counter-link); }
 
 /* ============================================== focus, skip link, a11y */
 :focus-visible {
   outline: 3px solid var(--refract);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-.counter-surface :focus-visible {
-  outline-color: var(--counter-link);
   border-radius: var(--radius-sm);
 }
 
@@ -247,8 +333,12 @@ em { font-style: normal; color: var(--refract); }
 }
 
 .shell { width: var(--shell); margin-inline: auto; }
-@media (max-width: 1023px) { .shell { width: var(--shell-tablet); } }
-@media (max-width: 599px)  { .shell { width: var(--shell-mobile); } }
+@media (max-width: 1023px) {
+  .shell { width: var(--shell-tablet); }
+}
+@media (max-width: 599px) {
+  .shell { width: var(--shell-mobile); }
+}
 
 /* ================================================================ materials */
 
@@ -260,7 +350,7 @@ em { font-style: normal; color: var(--refract); }
   border-top: 1px solid var(--glass-entry);
   border-bottom: 2px solid var(--glass-exit);
   border-inline: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
 }
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
@@ -271,6 +361,116 @@ em { font-style: normal; color: var(--refract); }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: var(--glass-fallback); }
+}
+
+/* ---- liquid glass -------------------------------------------------------
+ * The order buttons carry the ice aesthetic, so they get a refractive body
+ * rather than a flat fill: a top sheen, an inner bottom reflection, and a
+ * soft contact shadow that reads as thickness.
+ *
+ * The brief asked for high transparency. That is honoured, but the TEXT does
+ * not sit on the glass directly -- these carry an opaque ink and a dark inner
+ * floor, because the drifting field moves behind them and a moving backdrop
+ * under live text is how contrast silently dies. The glass is showy; the
+ * label stays legible.
+ */
+.liquid {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 var(--glass-sheen),
+    inset 0 -1px 0 var(--glass-exit);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
+}
+/* Renders the sheen and the rim as a pseudo layer rather than as a gradient in
+   `background`, which would reintroduce the directional key light section 2
+   rejects. */
+.liquid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    160deg,
+    var(--glass-entry) 0%,
+    rgb(255 255 255 / 4%) 38%,
+    rgb(180 214 226 / 10%) 72%,
+    var(--glass-exit) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.liquid > * { position: relative; z-index: 1; }
+
+@media (hover: hover) {
+  .liquid:hover {
+    background: rgb(255 255 255 / 9%);
+    transform: translateY(-1px);
+    box-shadow:
+      0 28px 68px -14px rgb(2 12 20 / 66%),
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      inset 0 -1px 0 var(--glass-exit);
+  }
+}
+.liquid:active {
+  transform: translateY(0) scale(0.985);
+  background: rgb(255 255 255 / 3%);
+}
+.liquid:focus-visible {
+  outline: 3px solid var(--frost);
+  outline-offset: 3px;
+}
+/* On the bright counter the ink flips: a WHITE glass face with counter-ink
+   labels, layered two-edge rim, and hover/active beats that must outrank the
+   global .liquid:hover below (they do, at 0,3,0). */
+.counter-surface .liquid {
+  background: var(--glass-liquid-face);
+  box-shadow:
+    0 18px 44px -12px rgb(2 12 20 / 24%),
+    inset 0 1px 0 var(--glass-sheen),
+    inset 0 -1px 0 var(--glass-exit-bright);
+  color: var(--counter-ink);
+}
+.counter-surface .liquid::before {
+  background: linear-gradient(
+    160deg,
+    var(--glass-entry-bright) 0%,
+    var(--glass-rim-bright) 38%,
+    var(--glass-exit-bright) 72%,
+    var(--glass-rim-dark) 100%
+  );
+}
+.counter-surface .liquid:focus-visible { outline-color: var(--counter-link); }
+@media (hover: hover) {
+  .counter-surface .liquid:hover {
+    background: var(--glass-liquid-face-hover);
+    transform: translateY(-1px);
+    box-shadow:
+      0 22px 50px -14px rgb(2 12 20 / 28%),
+      inset 0 1px 0 var(--glass-sheen),
+      inset 0 -1px 0 var(--glass-exit-bright);
+  }
+}
+.counter-surface .liquid:active {
+  background: var(--glass-liquid-face-active);
+  transform: translateY(0) scale(0.985);
 }
 
 /* Etched — the cold cousin. No rim: etched glass has no lit edge. */
@@ -287,12 +487,75 @@ em { font-style: normal; color: var(--refract); }
 }
 
 /* Counter — bright, near-opaque. Separation is the hairline, not the fill. */
+/* Regular-glass widget: the heavier, content-bearing variant. Its rim pair
+   carries the environment light (the pointer gradient rides the same masked
+   ring), and pressing through the deck flexes the material like a thicker
+   surface: deeper shadow, stronger lens. */
 .counter-card {
-  background: var(--counter-card);
-  border: 1px solid var(--counter-hair);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--counter-shadow);
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-face-bright);
+  border: 0;
+  border-radius: var(--radius-xl);
+  box-shadow:
+    var(--counter-shadow),
+    inset 0 1px 0 var(--glass-sheen),
+    inset 0 -1px 0 var(--glass-exit-bright);
+  transition: background-color var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
 }
+.counter-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    radial-gradient(
+      130% 170% at var(--spec-x) var(--spec-y),
+      var(--spec-glint-soft) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      160deg,
+      var(--glass-entry-bright) 0%,
+      var(--glass-rim-bright) 30%,
+      var(--glass-exit-bright) 82%,
+      var(--glass-rim-dark) 100%
+    );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.counter-card > * { position: relative; z-index: 1; }
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .counter-card {
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .counter-card { background: var(--counter-card); }
+}
+@media (hover: hover) {
+  .counter-card:hover {
+    background: var(--glass-face-bright-hover);
+    transform: translateY(-2px);
+    box-shadow:
+      var(--glass-shadow-thick),
+      inset 0 1px 0 var(--glass-sheen),
+      inset 0 -1px 0 var(--glass-exit-bright);
+  }
+}
+.counter-card:active { transform: translateY(0); }
 
 /* Grain — kills the unnaturally smooth neural-net look. No request. */
 .grain::after {
@@ -302,6 +565,29 @@ em { font-style: normal; color: var(--refract); }
   pointer-events: none;
   opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- the lens tier -------------------------------------------------------
+ * Real refraction, no WebGL, no third party: the inline SVG defs in
+ * index.html carry a gradient displacement map, and Chromium runs it ON the
+ * backdrop, so the field warps at every glass rim. Safari keeps the chained
+ * blur/sat/brightness (it parses url() but renders without the map);
+ * engines without SVG backdrop support stay on the plain tiers above via
+ * this @supports gate. Only true-Chromiumprompt surfaces are listed. */
+@supports (backdrop-filter: url("#lg-lens") blur(1px)) or
+          (-webkit-backdrop-filter: url("#lg-lens") blur(1px)) {
+  .counter-card,
+  .counter-surface .liquid,
+  .glass,
+  .audience,
+  .summary {
+    backdrop-filter: var(--lens-id) blur(var(--glass-blur)) saturate(var(--lens-sat)) brightness(var(--lens-bright));
+    -webkit-backdrop-filter: var(--lens-id) blur(var(--glass-blur)) saturate(var(--lens-sat)) brightness(var(--lens-bright));
+  }
+  .cta {
+    backdrop-filter: var(--lens-id) blur(var(--amber-glass-blur)) saturate(var(--lens-sat)) brightness(var(--lens-bright));
+    -webkit-backdrop-filter: var(--lens-id) blur(var(--amber-glass-blur)) saturate(var(--lens-sat)) brightness(var(--lens-bright));
+  }
 }
 
 /* ================================================================== header */
@@ -314,40 +600,95 @@ em { font-style: normal; color: var(--refract); }
   vertical-align: -0.15em;
 }
 
+/* Anchored targets stop clear of the floating chrome: one capsule-height
+   (tap plus its 12px top offset) plus one more capsule of breathing room.
+   Without it, #products and friends surface beneath the capsules on a
+   jump link (Pro-Max sticky-nav rule). */
+#main,
+#products,
+#delivery,
+#visit {
+  scroll-margin-top: calc(var(--tap) + var(--space-xs) * 3);
+}
+
+/* Chrome is the Clear lane: capsules floating above the content, per the
+   Liquid Glass chrome rule. Content passes beneath them; on scroll the
+   capsules thicken toward --chrome-face instead of a bar fading in. */
 .header {
   position: fixed;
   inset-block-start: 0;
   inset-inline: 0;
   z-index: var(--z-header);
+  padding-block: var(--space-xs);
   background: transparent;
-  border-bottom: 1px solid transparent;
-  transition: background-color var(--dur-base) var(--ease-out),
-              border-color var(--dur-base) var(--ease-out);
-}
-.header[data-scrolled] {
-  background: var(--glass-fallback);
-  border-top: 1px solid var(--glass-entry);
-  border-bottom: 2px solid var(--glass-exit);
-}
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  .header[data-scrolled] {
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  }
+  /* The header is a shell, not a surface: only its capsules take input. */
+  pointer-events: none;
 }
 
 .header__inner {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
+  gap: var(--space-xs);
   min-height: var(--tap);
-  padding-block: var(--space-xs);
+}
+
+.wordmark,
+.header__nav {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  background: var(--chrome-fill);
+  border-radius: var(--radius-pill);
+  box-shadow:
+    inset 0 1px 0 var(--chrome-entry),
+    inset 0 -1px 0 var(--chrome-exit),
+    0 12px 32px -12px rgb(2 12 20 / 55%);
+  transition: background-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .wordmark,
+  .header__nav {
+    backdrop-filter: blur(var(--chrome-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--chrome-blur)) saturate(var(--glass-sat));
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .wordmark,
+  .header__nav { background: var(--chrome-face); }
+}
+/* Environment light: one source (the pointer) chases around every glass
+   silhouette at once. No pointer-tracking JS needed for the header because
+   --spec-x/--spec-y live on the document. */
+.wordmark::after,
+.header__nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    150% 200% at var(--spec-x) var(--spec-y),
+    var(--spec-glint-soft),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+/* The scroll edge effect: glass thickens as content passes beneath it, which
+   is how the material keeps the copy legible without hard dividers. */
+.header[data-scrolled] .wordmark,
+.header[data-scrolled] .header__nav {
+  background: var(--chrome-face);
+  box-shadow:
+    inset 0 1px 0 var(--chrome-entry),
+    inset 0 -1px 0 var(--chrome-exit),
+    0 18px 48px -16px rgb(2 12 20 / 70%);
 }
 
 .wordmark {
-  display: inline-flex;
-  align-items: center;
+  padding-inline: 0.05rem var(--space-sm);
   min-block-size: var(--tap);
   white-space: nowrap;
   font-family: var(--font-display);
@@ -359,7 +700,7 @@ em { font-style: normal; color: var(--refract); }
   letter-spacing: 0;
 }
 
-.header__nav { display: flex; align-items: center; gap: var(--space-md); }
+.header__nav { gap: var(--space-xs); padding-inline: var(--space-xs); }
 /* :not(.cta) matters: `.header__nav a` (0,1,1) outranks `.cta` (0,1,0), and
    letting the nav colour win painted --mist on the amber fill at 1.22:1. */
 .header__nav a:not(.cta) {
@@ -373,7 +714,11 @@ em { font-style: normal; color: var(--refract); }
   text-decoration: none;
 }
 @media (hover: hover) {
-  .header__nav a:not(.cta):hover { color: var(--frost); }
+  .header__nav a:not(.cta):hover {
+    color: var(--frost);
+    background: var(--chrome-fill-hover);
+    border-radius: var(--radius-pill);
+  }
 }
 
 /* At 390px the wordmark, three section links and the CTA cannot share a row;
@@ -387,6 +732,7 @@ em { font-style: normal; color: var(--refract); }
   /* Scoped through .header__nav so it outranks the later `.status` rule —
      equal specificity meant the later definition won and `none` was ignored. */
   .header__nav .header__status { display: none; }
+  .header { padding-block: var(--space-3xs); }
 }
 .cta { white-space: nowrap; }
 
@@ -408,29 +754,85 @@ em { font-style: normal; color: var(--refract); }
 
 /* ==================================================================== CTA */
 /* Amber is a FILL only, always carrying --abyss text. It is never text. */
+/* Amber GLASS: the fill is translucent (82%) so it refracts, carries its
+   own blur, a specular sheen and an amber-tinted shadow. These rules live
+   AFTER .liquid:hover above so this block wins the equal-specificity
+   contest for .cta.liquid elements. */
 .cta {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2xs);
   min-block-size: var(--tap);
   padding: var(--space-xs) var(--space-md);
-  background: var(--amber);
+  background: var(--amber-glass);
   color: var(--abyss);
   font-weight: 600;
   font-size: var(--text--1);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   text-decoration: none;
+  box-shadow:
+    var(--amber-shadow),
+    inset 0 1px 0 var(--amber-sheen),
+    inset 0 -1px 0 var(--glass-exit-bright);
+  transition: background-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .cta {
+    backdrop-filter: blur(var(--amber-glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--amber-glass-blur)) saturate(var(--glass-sat));
+  }
+}
+/* The environment light warms up over amber: one of one material, so the
+   glint lives on its own layer rather than fighting the fill. */
+.cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    130% 180% at var(--spec-x) var(--spec-y),
+    var(--spec-glint),
+    transparent 58%
+  );
+  opacity: 0.5;
+  transition: opacity var(--dur-base) var(--ease-out);
+  pointer-events: none;
+}
+.cta > * { position: relative; z-index: 1; }
+@media (hover: hover) {
+  .cta:hover {
+    background: var(--amber-glass-hover);
+    transform: translateY(-1px);
+    box-shadow:
+      0 30px 64px -16px rgb(224 164 92 / 45%),
+      inset 0 1px 0 var(--amber-sheen),
+      inset 0 -1px 0 var(--glass-exit-bright);
+  }
+  .cta:hover::after { opacity: 0.9; }
+}
+.cta:active {
+  background: var(--amber-glass-active);
+  transform: translateY(0) scale(0.985);
 }
 /* Two-tone ring: 1px --abyss lip against its own fill, 3px --frost outer
-   ring against the abyss page. A single colour cannot satisfy both. */
+   ring against the abyss page. A single colour cannot satisfy both. The
+   amber shadow is re-stated so focus does not drop the glass shadow pair. */
 .cta:focus-visible {
   outline: 3px solid var(--frost);
   outline-offset: 2px;
-  box-shadow: 0 0 0 1px var(--abyss);
-  border-radius: var(--radius-md);
+  box-shadow:
+    0 0 0 1px var(--abyss),
+    var(--amber-shadow),
+    inset 0 1px 0 var(--amber-sheen),
+    inset 0 -1px 0 var(--glass-exit-bright);
+  border-radius: var(--radius-pill);
 }
 
 .button {
@@ -449,15 +851,19 @@ em { font-style: normal; color: var(--refract); }
   font-size: var(--text--1);
 }
 .button:focus-visible { outline-color: var(--frost); }
-@media (hover: hover) { .button:hover { background: var(--shelf); } }
+@media (hover: hover) {
+  .button:hover { background: var(--shelf); }
+}
 
 /* ==================================================================== hero */
 /* Scroll runway sets frame density: px/frame = (heroVh - 100)/100 *
-   viewportHeight / 48 frames. 180svh gives ~15 px/frame at a 900px viewport,
-   the middle of the comfortable 15-20 band. Raise this and it visibly steps. */
+   viewportHeight / 30 frames. 150svh gives ~15 px/frame at a 900px viewport.
+   This is the SAME density the 48-frame 360p reel had at 180svh — the reel
+   lost 18 frames and gained 4x the pixels, and the shorter runway is what
+   balances it. Raise this and the reel visibly steps. */
 .hero {
   position: relative;
-  min-block-size: 180svh;
+  min-block-size: 150svh;
   background: var(--abyss);
 }
 
@@ -490,14 +896,17 @@ em { font-style: normal; color: var(--refract); }
 /* The source cut at frame 18->19 is a scene change, so it must not dissolve.
    JS sets this class for that one transition only. */
 .hero__media.is-hard .hero__reel { transition: none; }
+/* Lifted from 64/24/88 to 40/10/56. The old 88% floor crushed the bottom of
+   the frame, which is where the bag and the ice cascade are. The remaining
+   scrim exists to hold hero type contrast, not to grade the footage. */
 .hero__veil {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgb(5 9 12 / 72%) 0%,
-    rgb(5 9 12 / 46%) 45%,
-    rgb(5 9 12 / 88%) 100%
+    rgb(5 9 12 / 40%) 0%,
+    rgb(5 9 12 / 10%) 45%,
+    rgb(5 9 12 / 56%) 100%
   );
 }
 
@@ -522,8 +931,12 @@ em { font-style: normal; color: var(--refract); }
   transition: opacity var(--dur-slow) var(--ease-cinematic);
   pointer-events: none;
 }
-@media (max-width: 1023px) { .hero__beat { inline-size: var(--shell-tablet); } }
-@media (max-width: 599px) { .hero__beat { inline-size: var(--shell-mobile); } }
+@media (max-width: 1023px) {
+  .hero__beat { inline-size: var(--shell-tablet); }
+}
+@media (max-width: 599px) {
+  .hero__beat { inline-size: var(--shell-mobile); }
+}
 .hero__beat[data-active] { opacity: 1; pointer-events: auto; }
 
 .hero__statement {
@@ -561,29 +974,21 @@ em { font-style: normal; color: var(--refract); }
   font-size: var(--text-0);
 }
 
-.hero__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-block-start: var(--space-lg);
-  font-family: var(--font-mono);
-  font-size: var(--text--1);
-  color: var(--haze);
-}
-.hero__meta svg { inline-size: 1.15em; block-size: 1.15em; }
-
+/* The reel speaks for itself — the frame meter was the naming the redesign
+   removes. What remains is the scrub's shadow: one luminous aperture edge. */
 .hero__progress {
   position: absolute;
   inset-block-end: 0;
   inset-inline: 0;
   z-index: var(--z-raised);
   block-size: 2px;
-  background: var(--glass-exit);
+  background: rgb(255 255 255 / 4%);
 }
 .hero__progress span {
   display: block;
   block-size: 100%;
-  background: var(--refract);
+  background: linear-gradient(90deg, var(--refract) 0%, var(--frost) 100%);
+  box-shadow: 0 0 18px rgb(111 211 234 / 45%);
   transform: scaleX(0);
   transform-origin: 0 50%;
 }
@@ -594,7 +999,7 @@ em { font-style: normal; color: var(--refract); }
 .counter-surface .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text--1);
-  color: var(--counter-mute);
+  color: var(--mist);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -604,13 +1009,18 @@ em { font-style: normal; color: var(--refract); }
   gap: var(--space-lg);
   grid-template-columns: repeat(3, 1fr);
 }
-@media (max-width: 1023px) { .products { grid-template-columns: 1fr; } }
+@media (max-width: 1023px) {
+  .products { grid-template-columns: 1fr; }
+}
 
+/* The card carries its own ink: frost would only pair with the old dark
+   stage, and text inside a lit card must resolve against the lit face. */
 .product {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   padding: var(--space-md);
+  color: var(--counter-ink);
 }
 .product__head {
   display: flex;
@@ -650,9 +1060,11 @@ em { font-style: normal; color: var(--refract); }
   align-items: center;
   gap: var(--space-2xs);
   padding: var(--space-3xs);
-  background: rgb(10 20 27 / 4%);
-  border-radius: var(--radius-md);
+  background: var(--ink-well);
+  box-shadow: inset 0 1px 2px var(--counter-hair);
+  border-radius: var(--radius-pill);
   align-self: flex-start;
+  color: var(--counter-ink);
 }
 .stepper__btn {
   inline-size: var(--tap);
@@ -661,15 +1073,21 @@ em { font-style: normal; color: var(--refract); }
   place-items: center;
   background: transparent;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   color: var(--counter-ink);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 .stepper__btn:disabled { cursor: not-allowed; color: var(--counter-mute); }
 @media (hover: hover) {
   .stepper__btn:not(:disabled):hover { background: rgb(10 20 27 / 8%); }
 }
-.stepper__btn:active:not(:disabled) { background: rgb(10 20 27 / 12%); }
+.stepper__btn:active:not(:disabled) {
+  background: rgb(10 20 27 / 12%);
+  transform: scale(0.92);
+}
 .stepper__btn:focus-visible { outline-color: var(--counter-link); }
 .stepper__btn svg { inline-size: 1.25rem; block-size: 1.25rem; }
 
@@ -685,9 +1103,24 @@ em { font-style: normal; color: var(--refract); }
 /* ================================================================ audience */
 /* Three cards that differ in STRUCTURE. Staggering alone does not defeat
    a template — proximity and alignment are what make a row read as one. */
+/* The stage is real dark glass: the drifting field moves behind it and the
+   blur feeds the cards' refraction. The @supports-not chain restores the
+   opaque deep so text pairs stand on a known face without the filter. */
 .audience {
   padding-block: var(--space-2xl);
-  background: var(--deep);
+  background: var(--glass-stage-dark);
+}
+/* No border lines: the one-canvas world is continuous, and the Liquid Glass
+   scroll-edge principle replaces dividers with the blur beneath the chrome.
+   Depth here comes from the stage face, not from hairlines. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .audience {
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .audience { background: var(--deep); }
 }
 .audience__grid {
   display: grid;
@@ -695,7 +1128,9 @@ em { font-style: normal; color: var(--refract); }
   grid-template-columns: 1.1fr 1fr 1.15fr;
   align-items: start;
 }
-@media (max-width: 1023px) { .audience__grid { grid-template-columns: 1fr; } }
+@media (max-width: 1023px) {
+  .audience__grid { grid-template-columns: 1fr; }
+}
 
 /* structural variant 1 — prose-led, no list */
 .audience__card--prose { padding: var(--space-lg); }
@@ -709,7 +1144,7 @@ em { font-style: normal; color: var(--refract); }
   color: var(--frost);
   font-variant-numeric: tabular-nums;
 }
-.audience__card--figure .audience__body { color: var(--haze); }
+.audience__card--figure .audience__body { color: var(--mist); }
 
 /* structural variant 3 — list-led, rules between rows */
 .audience__card--list { padding: var(--space-lg); }
@@ -729,10 +1164,12 @@ em { font-style: normal; color: var(--refract); }
 }
 .audience__rules svg { inline-size: 1.15em; block-size: 1.15em; color: var(--refract); }
 
+/* Eyebrows sit on a now-translucent dark face: haze resolves below 4.5:1
+   against glass over the abyss, so they light with --mist. */
 .audience__eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text--1);
-  color: var(--haze);
+  color: var(--mist);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -749,13 +1186,16 @@ em { font-style: normal; color: var(--refract); }
 /* =================================================================== visit */
 .visit { padding-block: var(--space-2xl); }
 
-/* 7/5 split: hours answer the question people arrive with, so they lead. */
+/* 7/5 split: hours answer the question people arrive with, so they lead.
+   Until a map is requested the panel column is empty by design, so the grid
+   collapses to one column and the practical copy keeps a reading width. */
 .visit__grid {
   display: grid;
   grid-template-columns: 7fr 5fr;
   gap: var(--space-2xl);
   align-items: start;
 }
+.visit__grid:has(> .map-panel[hidden]) { grid-template-columns: minmax(0, 62ch); }
 @media (max-width: 1023px) {
   .visit__grid { grid-template-columns: 1fr; gap: var(--space-xl); }
 }
@@ -772,18 +1212,18 @@ em { font-style: normal; color: var(--refract); }
   justify-content: space-between;
   gap: var(--space-md);
   padding-block: var(--space-xs);
-  border-top: 1px solid var(--counter-hair);
+  border-top: 1px solid var(--chrome-hair);
 }
-.hours dt { color: var(--counter-mute); font-size: var(--text-0); }
-.hours dd { margin: 0; font-family: var(--font-mono); color: var(--counter-ink); }
+.hours dt { color: var(--mist); font-size: var(--text-0); }
+.hours dd { margin: 0; font-family: var(--font-mono); color: var(--frost); }
 
 .address {
   margin-block-start: var(--space-lg);
-  color: var(--counter-mute);
+  color: var(--mist);
   font-size: var(--text--1);
 }
 .address a {
-  color: var(--counter-link);
+  color: var(--refract);
   display: inline-flex;
   align-items: center;
   min-block-size: var(--tap);
@@ -825,21 +1265,40 @@ em { font-style: normal; color: var(--refract); }
   margin-block-start: var(--space-md);
 }
 
-/* Dark-surface controls re-tint on the bright counter: the ramp switches
-   ink, it never interpolates. --refract measures 1.59:1 here, so the
-   counter uses --counter-link throughout. */
+/* Clear-lane secondary control on the dark canvas: a smoked chrome capsule,
+   no uniform border, inset edge pair. (The bright-lane version is scoped to
+   the cards; visit's controls sit on mineral now.) */
 .counter-surface .button {
-  color: var(--counter-ink);
-  border-color: var(--counter-hair);
+  position: relative;
+  isolation: isolate;
+  background: var(--chrome-fill);
+  color: var(--frost);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow:
+    inset 0 1px 0 var(--chrome-entry),
+    inset 0 -1px 0 var(--chrome-exit);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .counter-surface .button {
+    backdrop-filter: blur(var(--chrome-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--chrome-blur)) saturate(var(--glass-sat));
+  }
 }
 @media (hover: hover) {
-  .counter-surface .button:hover { background: rgb(10 20 27 / 4%); }
+  .counter-surface .button:hover {
+    background: var(--chrome-fill-hover);
+    box-shadow:
+      inset 0 1px 0 var(--chrome-entry),
+      inset 0 -1px 0 var(--chrome-exit);
+  }
 }
-.counter-surface .button:focus-visible { outline-color: var(--counter-link); }
+.counter-surface .button:focus-visible { outline-color: var(--frost); }
 
-.counter-surface .status { color: var(--counter-mute); }
-.counter-surface .status__dot { background: var(--counter-mute); }
-.counter-surface .status[data-open-status="open"] .status__dot { background: var(--counter-link); }
+.counter-surface .status { color: var(--mist); }
+.counter-surface .status__dot { background: var(--haze); }
+.counter-surface .status[data-open-status="open"] .status__dot { background: var(--refract); }
 
 /* ================================================================== footer */
 .footer {
@@ -876,8 +1335,37 @@ em { font-style: normal; color: var(--refract); }
   z-index: var(--z-summary);
   inline-size: min(22rem, calc(100% - var(--space-lg) * 2));
   padding: var(--space-md);
-  background: var(--glass-fallback);
+  background: var(--glass-face-dark);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    var(--glass-shadow-thick),
+    inset 0 1px 0 var(--glass-sheen),
+    inset 0 -1px 0 var(--glass-exit-dark);
 }
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .summary {
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .summary { background: var(--chrome-face); }
+}
+/* The summary's grain holds ::after, so the environment light rides ::before
+   (unmasked soft glint — the panel is bigger than a control ring). */
+.summary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    140% 190% at var(--spec-x) var(--spec-y),
+    var(--spec-glint-soft),
+    transparent 58%
+  );
+  pointer-events: none;
+}
+.summary > * { position: relative; z-index: 1; }
 .summary[hidden] { display: none; }
 .summary__lines {
   display: grid;
@@ -911,6 +1399,103 @@ em { font-style: normal; color: var(--refract); }
     inline-size: auto;
     margin-block-end: env(safe-area-inset-bottom);
   }
+}
+
+/* ---- the drifting field -------------------------------------------------
+ * Large ghosted words and icons that translate with scroll, sitting behind
+ * every glass surface. This is what makes the glass legible as glass rather
+ * than as decoration: there is genuinely high-frequency content behind it, so
+ * the blur destroys real information. That is the condition section 2's glass
+ * gate sets out, and it is why this does not read as a glass card grid.
+ *
+ * Fixed so it stays behind the fixed header and fixed order summary for the
+ * whole scroll, which is where the refraction is visible. Opacity is held low
+ * on purpose: it must never compete with the copy.
+ */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.field__track {
+  position: absolute;
+  inset-block-start: -60%;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3xl) var(--space-2xl);
+  align-items: center;
+  will-change: transform;
+  transform: translate3d(0, var(--field-y, 0px), 0);
+}
+.field__word {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 13vw, 12rem);
+  font-variation-settings: "opsz" 72;
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  color: var(--field-ink);
+  white-space: nowrap;
+  user-select: none;
+}
+.field__icon {
+  inline-size: clamp(3rem, 8vw, 7rem);
+  block-size: clamp(3rem, 8vw, 7rem);
+  color: var(--field-ink-strong);
+  justify-self: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .field__track { transform: none; }
+}
+
+/* ================================================== reduce transparency */
+/* The platform lane maps to opaque faces: the lens silhouette, hairlines
+   and shadows keep their forms, the fills go solid. Dark inks sit on the
+   bright faces they already passed against; light inks on the darker ones. */
+@media (prefers-reduced-transparency: reduce) {
+  .counter-card { background: rgb(242 246 248); }
+  .glass { background: var(--glass-fallback); }
+  .wordmark,
+  .header__nav,
+  .button { background: rgb(10 22 30 / 96%); }
+  .cta { background: rgb(224 164 92); }
+  .counter-card,
+  .glass,
+  .wordmark,
+  .header__nav,
+  .button,
+  .cta {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* =============================================== scroll reveal — subtle */
+/* Pro-Max subtle tier: section heads and cards rise 12px and fade in over
+   380ms of expo-out, played once. Hiding is scoped under the .js root the
+   head bootstrap adds, so a scriptless visit renders fully. */
+.js .js-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 380ms var(--ease-out),
+    transform 380ms var(--ease-out);
+}
+.js .js-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+.js .products .js-reveal:nth-child(2),
+.js .audience__grid .js-reveal:nth-child(2) {
+  transition-delay: 60ms;
+}
+.js .products .js-reveal:nth-child(3),
+.js .audience__grid .js-reveal:nth-child(3) {
+  transition-delay: 120ms;
 }
 
 /* =================================================== reduced motion (first) */
