@@ -4,7 +4,9 @@
 .agents/
 scrollcraft/
 node_modules/
-site/node_modules/
+app/node_modules/
+app/dist/
+shots/
 site/lab/shots/*
 !site/lab/shots/report.json
 site/lab/redesign/*.png

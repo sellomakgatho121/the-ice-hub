@@ -2,7 +2,7 @@
 
 ## Direction
 
-Primary surface: Decide / Learn. Separate the proposition from the product film; keep the seven narrative subjects but reserve scroll runways for the film and fracture. The product range is a visible list rather than a clipped horizontal rail. Hours, contact details and collection stay in normal document flow.
+Primary surface: Decide / Learn. Separate the proposition from the product film; keep the seven narrative subjects but reserve scroll runways for the film and fracture. The product range is a horizontal scroll-snap rail on mobile and a three-up grid on desktop. Hours, contact details and collection stay in normal document flow.
 
 Preserved: local imagery, self-hosted Bricolage Grotesque and Instrument Sans, mineral palette, amber collection actions, product options and shop details.
 

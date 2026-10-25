@@ -1,23 +1,30 @@
-# The Ice Hub
+# The Ice Hub — static rollback
+
+> **2026-10-25 — React/Tailwind migration.** The deploy target is now
+> [`../app/`](../app/) (see [`../docs/design/migration-plan.md`](../docs/design/migration-plan.md)).
+> This `site/` tree is the verified static rollback and is kept until the live
+> React build is checked. The current static build follows the “Cold ledger”
+> direction in [`../docs/design/brief.md`](../docs/design/brief.md) (Bricolage
+> Grotesque / Instrument Sans / JetBrains Mono, 30 frames, 30-bag bulk
+> threshold). The older design notes below are historical where they conflict.
 
 A storefront for a counter-service ice shop in Tembisa. Static HTML, CSS and
 native ES modules — no framework, no build step, no CMS, and no third-party
 request on load. Orders are composed in the browser and handed to WhatsApp;
 nothing is stored and no customer data leaves the device.
 
-The design contract that governs this build is [`../DESIGN.md`](../DESIGN.md).
-It supersedes `BRAND.md`, `BRIEF.md` and `spec/`.
+The design contract for the static rollback is
+[`../docs/design/brief.md`](../docs/design/brief.md). The older `DESIGN.md`
+v2 describes a superseded glossy direction.
 
 ## Experience architecture
 
-1. **Hero reel** — 48 frames merged from two supplied clips into one continuous
-   15s sequence, at 640×360 WebP q72 (589 KB, 41.9 dB). Frame density is the
-   governing constraint: `px/frame = (heroVh − 100)/100 × viewportHeight ÷
-   frameCount`. The hero is **180svh** to hold that at ~15 px/frame; the
-   previous 390svh/20-frame build gave 130.5 px/frame and read as choppy.
-   The join between the two clips is a real discontinuity (they share no
-   overlapping frame), so it sits exactly on the beat 3/4 boundary and swaps
-   without a crossfade; all other transitions dissolve.
+1. **Hero reel** — 30 frames from a single 8s / 1280×720 clip, WebP
+   (844 KB). Frame density is the governing constraint: `px/frame = (heroVh −
+   100)/100 × viewportHeight ÷ frameCount`. The hero is **150svh** to hold that
+   at ~15 px/frame; the previous 390svh/20-frame build gave 130.5 px/frame and
+   read as choppy. The reel is one continuous clip, so every transition
+   crossfades and there is no seam.
 2. **Counter** — three products with real prices, quantity steppers and a live
    estimated total. Crossing 20 bags drops the whole line to stock price and
    is announced in a polite live region.

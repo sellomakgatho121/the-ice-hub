@@ -1,0 +1,13 @@
+{
+  "name": "The Ice Hub",
+  "short_name": "Ice Hub",
+  "description": "Ice in Tembisa. 2 kg and 3 kg bags from R17, 30 kg blocks at R55. Free delivery around Tembisa.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0A1620",
+  "theme_color": "#0A1620",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

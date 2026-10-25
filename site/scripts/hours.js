@@ -39,11 +39,14 @@ export function getShopStatus(date = new Date()) {
 }
 
 export function paintOpenStatus(root = document) {
-  const el = root.querySelector("[data-open-status]");
-  if (!el) return;
+  const els = root.querySelectorAll("[data-open-status]");
+  if (!els.length) return;
   const status = getShopStatus();
-  el.dataset.openStatus = status.state;
-  el.textContent = status.label;
+  for (const el of els) {
+    el.dataset.openStatus = status.state;
+    el.textContent = status.label;
+    el.closest(".status")?.classList.toggle("is-open", status.state === "open");
+  }
 }
 
 if (typeof document !== "undefined") {

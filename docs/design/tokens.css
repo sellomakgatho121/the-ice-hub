@@ -1,0 +1,71 @@
+/* ==========================================================================
+   The Ice Hub — design tokens (Cold ledger direction)
+   Source of truth for the redesign. site/styles.css consumes these.
+   Tokens only: no component may hard-code a hex/radius/spacing value.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* --- surfaces --- */
+  --ink-0: #0A1620;   /* page canvas */
+  --ink-1: #10202C;   /* surface */
+  --ink-2: #1A2E3C;   /* raised surface */
+  --rule:  #263D4D;   /* hairline / divider / border */
+
+  /* --- text --- */
+  --ice-100: #F0F6F9; /* frost white primary text on ink */
+  --ice-300: #B0C8D4; /* secondary text */
+  --ice-500: #7A96A3; /* tertiary / eyebrows */
+
+  /* --- accents (one each, role-locked) --- */
+  --accent:   #4FC3DC; /* glacial cyan: links, focus, progress, strokes */
+  --accent-2: #F0F6F9; /* frost: CTA fills, dark text */
+
+  /* --- semantic --- */
+  --danger:  #C96B5C;
+  --success: #7FA88A;
+
+  /* --- type --- */
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", sans-serif;
+  --font-body:    "Instrument Sans", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", "ui-monospace", monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-xl:   clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  --text-display: clamp(2.5rem, 1.6rem + 4vw, 6rem);
+
+  --leading-tight: 1.05;
+  --leading-body:  1.55;
+  --measure: 68ch;
+
+  /* --- space (4px base) --- */
+  --s-1: 4px;   --s-2: 8px;   --s-3: 12px;  --s-4: 16px;
+  --s-5: 24px;  --s-6: 32px;  --s-7: 48px;  --s-8: 64px;
+  --s-9: 96px;  --s-10: 128px;
+
+  /* --- radius policy: sharp (2px) for surfaces, pill for controls --- */
+  --radius-surface: 2px;
+  --radius-control: 999px;
+
+  /* --- elevation: borders + background shifts only --- */
+  --shadow-none: none;
+
+  /* --- focus --- */
+  --focus-ring: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--accent);
+
+  /* --- motion --- */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms;
+  }
+}

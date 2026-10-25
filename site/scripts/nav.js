@@ -13,7 +13,7 @@ const sections = navLinks
 if (header && hero && "IntersectionObserver" in window) {
   new IntersectionObserver(
     ([entry]) => header.toggleAttribute("data-scrolled", !entry.isIntersecting),
-    { rootMargin: "-64px 0px 0px 0px" },
+    { rootMargin: "-120px 0px 0px 0px" },
   ).observe(hero);
 }
 

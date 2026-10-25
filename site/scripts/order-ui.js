@@ -13,7 +13,7 @@ const cards = [...document.querySelectorAll("[data-product-card]")];
 const summary = document.querySelector("[data-summary]");
 const summaryLines = document.querySelector("[data-summary-lines]");
 const summaryTotal = document.querySelector("[data-summary-total]");
-const summaryCta = document.querySelector("[data-summary-cta]");
+const summaryCtas = [...document.querySelectorAll("[data-summary-cta]")];
 const announcer = document.querySelector("[data-order-announce]");
 
 const productById = new Map(SHOP.products.map((p) => [p.id, p]));
@@ -53,7 +53,13 @@ function renderSummary(summaryState) {
   if (!summary) return;
   const empty = summaryState.itemCount === 0;
   summary.hidden = empty;
-  if (empty) return;
+  if (empty) {
+    // Clearing the order must also clear the always-visible mobile-bar link,
+    // otherwise it keeps the last order it was given.
+    const bare = `https://wa.me/${SHOP.whatsappDigits}`;
+    for (const cta of summaryCtas) cta.href = bare;
+    return;
+  }
 
   if (summaryLines) {
     summaryLines.replaceChildren(
@@ -70,7 +76,8 @@ function renderSummary(summaryState) {
   }
 
   if (summaryTotal) summaryTotal.textContent = rands(summaryState.total);
-  if (summaryCta) summaryCta.href = buildWhatsAppUrl(summaryState);
+  const url = buildWhatsAppUrl(summaryState);
+  for (const cta of summaryCtas) cta.href = url;
 }
 
 function repaint() {
