@@ -1,29 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { SHOP } from "../lib/config.js";
+import React from "react";
 
-/* Clean footer with shop details and WhatsApp link. */
 export default function Footer() {
-  const [year, setYear] = useState(2026);
-
-  useEffect(() => setYear(new Date().getFullYear()), []);
-
   return (
     <footer className="footer">
       <div className="shell footer__inner">
-        <div>
-          <p>The Ice Hub · Tembisa</p>
-          <p>9605 Winnie Mandela Zone 4, Raymond Mhlaba Street, Tembisa 1632, South Africa</p>
-        </div>
-        <div>
-          <p>
-            <a href={`tel:+${SHOP.whatsappDigits}`}>{SHOP.whatsappDisplay}</a> ·{" "}
-            <a href={`https://wa.me/${SHOP.whatsappDigits}`} rel="noopener">
-              Order on WhatsApp
-            </a>
+        <div className="footer-brand">
+          <div className="footer-wordmark">THE ICE HUB</div>
+          <p className="footer-dev">
+            Responsive storefront prototype · Contact and product details pending confirmation
           </p>
         </div>
-        <div>
-          <p>© {year} Zero Degrees. All rights reserved.</p>
+        <div className="footer-links">
+          <a href="#hero">Home</a>
+          <a href="#about">About</a>
+          <a href="#products">Products</a>
+          <a href="#contact">Contact</a>
         </div>
       </div>
     </footer>

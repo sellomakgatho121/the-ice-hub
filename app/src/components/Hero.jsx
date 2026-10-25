@@ -1,47 +1,46 @@
 import React from "react";
-import { SHOP } from "../lib/config.js";
+import HeroProduct from "./HeroProduct.jsx";
 
-/* Editorial hero: product photography left, bold typography right.
-   The front-facing product shot is the undisputed star. */
+const BENEFITS = [
+  { label: "Long lasting cooling", icon: "❄️" },
+  { label: "Pure & clean ice", icon: "✨" },
+  { label: "Food grade bags", icon: "🛡️" },
+  { label: "Perfect for any occasion", icon: "🎉" },
+];
+
 export default function Hero() {
   return (
     <section className="hero" id="hero" aria-labelledby="hero-statement">
-      <div className="hero__image">
-        <img
-          src="/assets/products/product-front.jpg"
-          alt="2 kg ice-cube bag — front-facing product shot"
-          width="923"
-          height="1152"
-          decoding="async"
-          fetchPriority="high"
-        />
+      <div className="hero__left">
+        <p className="hero__eyebrow">PURE ICE. REAL FRESHNESS.</p>
+        <h1 className="hero__statement" id="hero-statement">
+          THE ICE HUB
+        </h1>
+        <h2 className="hero__category">ICE CUBE BAGS</h2>
+        <p className="hero__sub">
+          Crystal clear. Fresh. Reliable.<br />
+          Our ice cube bags are designed for homes, events, businesses and every moment that needs a little more chill.
+        </p>
+        <div className="hero__cta-group">
+          <a href="#contact" className="button">Order Now</a>
+          <a href="#products" className="button button--outline">View Products</a>
+        </div>
+        <p className="scroll-cue">SCROLL TO EXPLORE</p>
       </div>
 
-      <div className="hero__content">
-        <p className="hero__eyebrow">Ice · Tembisa · Since 2026</p>
-        <h1 className="hero__statement" id="hero-statement">
-          Pure ice. <span className="hero__accent">Zero fuss.</span>
-        </h1>
-        <p className="hero__sub">
-          Crystal-clear 2 kg and 3 kg ice-cube bags, 30 kg blocks, free delivery around Tembisa.
-          Order straight to the shop on WhatsApp.
-        </p>
-        <div className="hero__price">
-          R<span>17</span> per 2 kg bag
-        </div>
-        <div className="hero__cta-group">
-          <a
-            className="button"
-            href={`https://wa.me/${SHOP.whatsappDigits}?text=Hello%20The%20Ice%20Hub,%20I%20would%20like%20to%20order%20ice.%20Please%20send%20prices%20and%20availability.`}
-            rel="noopener"
-          >
-            Order on WhatsApp
-          </a>
-          <a className="button button--outline" href="#products" rel="noopener">
-            View products
-          </a>
-        </div>
+      <div className="hero__right">
+        <HeroProduct />
       </div>
+
+      <aside className="benefit-panel" aria-label="Product benefits">
+        <div className="benefit-label">WHY ICE CUBE BAGS</div>
+        {BENEFITS.map((b, i) => (
+          <div key={i} className="benefit-item">
+            <span className="benefit-icon">{b.icon}</span>
+            <div className="benefit-text">{b.label}</div>
+          </div>
+        ))}
+      </aside>
     </section>
   );
 }

@@ -1,40 +1,58 @@
-import React from "react";
-import { SHOP } from "../lib/config.js";
-import { useHeaderState, useSectionNav } from "../hooks/useHeaderState.js";
-import { useShopStatus } from "../hooks/useShopStatus.js";
+import React, { useState, useEffect } from "react";
+import { useReveal } from "../hooks/useReveal.js";
 
-const waUrl = `https://wa.me/${SHOP.whatsappDigits}`;
-
-const SECTIONS = [
-  { id: "products", label: "Products" },
-  { id: "delivery", label: "Delivery" },
-  { id: "location", label: "Location" },
-  { id: "hours", label: "Hours" },
+const NAV_LINKS = [
+  { label: "Home", href: "#hero" },
+  { label: "About", href: "#about" },
+  { label: "Products", href: "#products" },
+  { label: "Why Us", href: "#occasions" },
+  { label: "Contact", href: "#contact" },
 ];
 
-/* Clean sticky header: logo left, section links right, WhatsApp CTA far right.
-   Status dot shows open/closed. */
 export default function Header() {
-  const currentId = useSectionNav();
-  const status = useShopStatus();
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <header className="header" data-header="">
-      <div className="shell header__inner">
-        <a className="wordmark" href="#main">
-          Zero Degrees
-        </a>
-        <nav className="header__nav" aria-label="Sections">
-          {SECTIONS.map(({ id, label }) => (
-            <a href={`#${id}`} key={id} aria-current={currentId === id ? "location" : undefined}>
-              {label}
-            </a>
-          ))}
-          <a className="button" href={waUrl} rel="noopener">
-            WhatsApp us
-          </a>
-        </nav>
-      </div>
-    </header>
+    <>
+      <header className={`header ${scrolled ? "scrolled" : ""}`}>
+        <div className="shell header__inner">
+          <a className="wordmark" href="#hero">THE ICE HUB</a>
+          <nav className="header__nav" aria-label="Main navigation">
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} className={link.label === "Home" ? "active" : ""}>
+                {link.label}
+              </a>
+            ))}
+            <a href="#contact" className="button button--outline">Get in Touch</a>
+          </nav>
+          <button className="menu-toggle" onClick={toggleMenu} aria-expanded={isOpen} aria-label="Menu">
+            {isOpen ? "✕" : "☰"}
+          </button>
+        </div>
+      </header>
+
+      {isOpen && (
+        <div className="mobile-menu-overlay" onClick={toggleMenu}>
+          <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+            <button className="menu-close" onClick={toggleMenu} aria-label="Close menu">✕</button>
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} onClick={toggleMenu} className="mobile-link">
+                {link.label}
+              </a>
+            ))}
+            <a href="#contact" className="button" onClick={toggleMenu}>Get in Touch</a>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
