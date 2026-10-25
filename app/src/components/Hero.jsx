@@ -1,104 +1,46 @@
 import React from "react";
 import { SHOP } from "../lib/config.js";
-import { useReel } from "../hooks/useReel.js";
 
-/* The signature: a 150svh sticky runway scrubbing the owner's 30-frame reel.
- * Beat 1 is the active beat at first paint, exactly as the live site paints.
- * The scrub, progress hairline, and two-layer crossfade live in useReel. */
+/* Editorial hero: product photography left, bold typography right.
+   The front-facing product shot is the undisputed star. */
 export default function Hero() {
-  const { heroRef, layerARef, layerBRef, barRef, beat } = useReel();
-
-  const beats = [
-    {
-      n: 1,
-      content: (
-        <>
-          <h1 className="hero__statement" id="hero-statement">
-            Below freezing, on Raymond Mhlaba Street.
-          </h1>
-          <p className="hero__sub">
-            Ice in Tembisa from R17 a bag. Free delivery around Tembisa, open seven days a week.
-          </p>
-        </>
-      ),
-    },
-    {
-      n: 2,
-      content: (
-        <>
-          <p className="hero__line">From one bag to thirty.</p>
-          <p className="hero__sub">
-            R17 for a 2 kg bag, R22 for a 3 kg. At thirty bags or more the whole line drops to stock price: R10 and
-            R12.
-          </p>
-        </>
-      ),
-    },
-    {
-      n: 3,
-      content: (
-        <>
-          <p className="hero__line">More cold. Less waiting.</p>
-          <p className="hero__sub">
-            Free delivery around Tembisa. Call ahead and it is cut and bagged while you are on your way.
-          </p>
-        </>
-      ),
-    },
-    {
-      n: 4,
-      content: (
-        <>
-          <p className="hero__line">Choose it. Send it.</p>
-          <p className="hero__sub">Pick your bags, build the order, send it straight to the shop on WhatsApp.</p>
-        </>
-      ),
-    },
-  ];
-
   return (
-    <section className="hero" id="hero" data-hero="" aria-labelledby="hero-statement" ref={heroRef}>
-      <div className="hero__stage">
-        <div className="hero__media">
-          <img
-            id="reel-img"
-            ref={layerARef}
-            className="hero__reel is-front"
-            src="/assets/reel/frame-001.webp"
-            alt=""
-            width="1280"
-            height="720"
-            decoding="async"
-            fetchPriority="high"
-            data-reel-layer=""
-          />
-          <img
-            ref={layerBRef}
-            className="hero__reel"
-            src="/assets/reel/frame-001.webp"
-            alt=""
-            width="1280"
-            height="720"
-            decoding="async"
-            aria-hidden="true"
-            data-reel-layer=""
-          />
-        </div>
+    <section className="hero" id="hero" aria-labelledby="hero-statement">
+      <div className="hero__image">
+        <img
+          src="/assets/products/product-front.jpg"
+          alt="2 kg ice-cube bag — front-facing product shot"
+          width="923"
+          height="1152"
+          decoding="async"
+          fetchPriority="high"
+        />
+      </div>
 
-        <div className="hero__beats">
-          {beats.map(({ n, content }) => (
-            <div className="hero__beat" data-beat={n} data-active={beat === n ? "" : undefined} key={n}>
-              {content}
-            </div>
-          ))}
+      <div className="hero__content">
+        <p className="hero__eyebrow">Ice · Tembisa · Since 2026</p>
+        <h1 className="hero__statement" id="hero-statement">
+          Pure ice. <span className="hero__accent">Zero fuss.</span>
+        </h1>
+        <p className="hero__sub">
+          Crystal-clear 2 kg and 3 kg ice-cube bags, 30 kg blocks, free delivery around Tembisa.
+          Order straight to the shop on WhatsApp.
+        </p>
+        <div className="hero__price">
+          R<span>17</span> per 2 kg bag
         </div>
-
-        <div className="hero__progress" aria-hidden="true">
-          <span data-reel-bar="" ref={barRef} />
+        <div className="hero__cta-group">
+          <a
+            className="button"
+            href={`https://wa.me/${SHOP.whatsappDigits}?text=Hello%20The%20Ice%20Hub,%20I%20would%20like%20to%20order%20ice.%20Please%20send%20prices%20and%20availability.`}
+            rel="noopener"
+          >
+            Order on WhatsApp
+          </a>
+          <a className="button button--outline" href="#products" rel="noopener">
+            View products
+          </a>
         </div>
-        <a className="button button--frost hero__cta" href={`https://wa.me/${SHOP.whatsappDigits}`} rel="noopener">
-          Order on WhatsApp
-        </a>
       </div>
     </section>
   );

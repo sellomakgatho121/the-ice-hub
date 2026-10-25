@@ -10,17 +10,27 @@ export default function Delivery() {
           Ice for the week, the function, and the floor
         </h2>
 
-        <div className="audience">
-          <article className="audience__card js-reveal">
-            <p className="eyebrow">Everyday</p>
+        <div className="bento">
+          <article className="bento__card js-reveal">
+            <p className="eyebrow" style={{color: '#F0F6F9'}}>Everyday</p>
             <h3 className="audience__title">A bag before work</h3>
             <p className="audience__body">
               Most people buy on the way past. Two kilos fills a cooler for a long day; three is still the better rate
               if you are throwing a braai.
             </p>
           </article>
-          <article className="audience__card js-reveal">
-            <p className="eyebrow">Events</p>
+          <article className="bento__card js-reveal tall">
+            <div className="delivery__motion">
+              <img
+                src="/assets/products/product-motion-2.png"
+                alt="Ice product detail"
+                width="410"
+                height="512"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <p className="eyebrow" style={{color: '#F0F6F9'}}>Events</p>
             <p className="audience__figure">R10</p>
             <h3 className="audience__title">Thirty bags or more</h3>
             <p className="audience__body">
@@ -28,8 +38,8 @@ export default function Delivery() {
               one message.
             </p>
           </article>
-          <article className="audience__card js-reveal">
-            <p className="eyebrow">Venues</p>
+          <article className="bento__card js-reveal wide">
+            <p className="eyebrow" style={{color: '#F0F6F9'}}>Venues</p>
             <h3 className="audience__title">Standing orders</h3>
             <ul className="audience__rules">
               <li>

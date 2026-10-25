@@ -1,13 +1,12 @@
 import React from "react";
 import { SHOP } from "../lib/config.js";
 import { getUnitPrice } from "../lib/order.js";
-import Icon from "./Icon.jsx";
 
-/* Product cards keep the prerendered shape: prices render through
- * getUnitPrice so the stock tier shows the moment the threshold is crossed,
- * `data-bulk` marks the card at-bulk, minus is disabled at 0, and the direct
- * per-product WhatsApp links bypass the order entirely. */
-const CARD_ICONS = { "cubes-2kg": "box", "cubes-3kg": "box", "block-30kg": "weight" };
+const CARD_IMAGES = {
+  "cubes-2kg": "/assets/products/product-front.jpg",
+  "cubes-3kg": "/assets/products/product-motion-1.jpg",
+  "block-30kg": "/assets/products/product-motion-2.png",
+};
 const UNIT_LABELS = {
   "cubes-2kg": { one: "2 kg bag", many: "2 kg ice-cube bags" },
   "cubes-3kg": { one: "3 kg bag", many: "3 kg ice-cube bags" },
@@ -18,11 +17,11 @@ function stockNote(product) {
   if (product.stockPrice === null || product.stockThreshold === null) {
     return "Flat rate. No bulk tier.";
   }
-  return `${product.stockThreshold} or more drops to R${product.stockPrice} a bag.`;
+  return `${product.stockThreshold}+ bags drop to R${product.stockPrice} each for the whole line.`;
 }
 
 function orderHref(product) {
-  const message = `Hello The Ice Hub, I would like to order ${UNIT_LABELS[product.id].many}.`;
+  const message = `Hello Zero Degrees, I would like to order ${UNIT_LABELS[product.id].many}.`;
   return `https://wa.me/${SHOP.whatsappDigits}?text=${encodeURIComponent(message)}`;
 }
 
@@ -30,12 +29,14 @@ export default function Products({ order }) {
   const { quantities, setQuantity } = order;
 
   return (
-    <section className="section counter-surface" id="products" aria-labelledby="products-title">
+    <section className="section" id="products" aria-labelledby="products-title">
       <div className="shell">
-        <p className="eyebrow js-reveal">Prices effective 20 May 2026</p>
-        <h2 className="js-reveal" id="products-title">
-          Buy ice
-        </h2>
+        <div className="section__head">
+          <p className="eyebrow js-reveal">Prices effective 20 May 2026</p>
+          <h2 className="js-reveal" id="products-title">
+            Order ice
+          </h2>
+        </div>
 
         <ul className="products">
           {SHOP.products.map((product) => {
@@ -43,22 +44,28 @@ export default function Products({ order }) {
             const atBulk = product.stockPrice !== null && quantity >= product.stockThreshold;
             return (
               <li
-                className="product js-reveal"
+                className={`product js-reveal ${atBulk ? "product--bulk" : ""}`}
                 key={product.id}
                 data-product-card=""
                 data-product={product.id}
                 data-bulk={atBulk ? "" : undefined}
               >
+                <img
+                  className="product__image"
+                  src={CARD_IMAGES[product.id]}
+                  alt={`${product.name} product shot`}
+                  width="923"
+                  height="1152"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="product__head">
                   <h3 className="product__name">{product.name}</h3>
                   <p className="product__price">
                     <span data-price="">{`R${getUnitPrice(product, quantity)}`}</span>
                   </p>
                 </div>
-                <p className="product__use">
-                  <Icon name={CARD_ICONS[product.id]} />
-                  {product.use}
-                </p>
+                <p className="product__use">{product.use}</p>
                 <p className="product__note" data-stock-note="">
                   {stockNote(product)}
                 </p>
@@ -72,7 +79,7 @@ export default function Products({ order }) {
                     onClick={() => setQuantity(product.id, (current) => Math.max(0, current - 1))}
                     disabled={quantity === 0}
                   >
-                    <Icon name="minus" />
+                    −
                   </button>
                   <output className="stepper__qty" data-qty={product.id} aria-live="off">
                     {quantity}
@@ -85,12 +92,17 @@ export default function Products({ order }) {
                     aria-label={`One more ${UNIT_LABELS[product.id].one}`}
                     onClick={() => setQuantity(product.id, (current) => current + 1)}
                   >
-                    <Icon name="plus" />
+                    +
                   </button>
                 </div>
                 <a className="button" href={orderHref(product)} rel="noopener" data-direct-order="">
-                  Order by WhatsApp
+                  Order via WhatsApp
                 </a>
+                {atBulk && (
+                  <p className="product__bulk">
+                    Bulk price applied — R{product.stockPrice} each
+                  </p>
+                )}
               </li>
             );
           })}

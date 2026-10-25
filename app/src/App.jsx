@@ -3,6 +3,7 @@ import SkipLink from "./components/SkipLink.jsx";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
 import Products from "./components/Products.jsx";
+import Steps from "./components/Steps.jsx";
 import Stats from "./components/Stats.jsx";
 import Story from "./components/Story.jsx";
 import Delivery from "./components/Delivery.jsx";
@@ -13,9 +14,6 @@ import Summary from "./components/Summary.jsx";
 import { useOrder } from "./hooks/useOrder.js";
 import { useReveal } from "./hooks/useReveal.js";
 
-/* Phase B: the interaction port. Order state lives once, here; the section
- * components receive it (or their own hooks) and the `role=status` announcer
- * carries the bulk-threshold message. */
 export default function App() {
   const order = useOrder();
   useReveal();
@@ -27,6 +25,7 @@ export default function App() {
       <main id="main">
         <Hero />
         <Products order={order} />
+        <Steps />
         <Stats />
         <Story />
         <Delivery />

@@ -1,9 +1,7 @@
 import React from "react";
 import { SHOP } from "../lib/config.js";
 
-/* Order summary, hidden with the order empty. Lines and total render from
- * the derived order state; the CTA hides with the summary, and the mobile
- * bar keeps the always-visible link (bare wa.me when the order clears). */
+/* Order summary drawer. Hidden when empty, slides up on mobile. */
 export default function Summary({ order }) {
   const { summary, href } = order;
   const empty = summary.itemCount === 0;
@@ -24,7 +22,7 @@ export default function Summary({ order }) {
         <strong data-summary-total="">{`R${summary.total}`}</strong>
       </p>
       {!empty && (
-        <a className="cta" href={href} rel="noopener" data-summary-cta="">
+        <a className="button" href={href} rel="noopener" data-summary-cta="">
           Send order on WhatsApp
         </a>
       )}

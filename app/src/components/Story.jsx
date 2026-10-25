@@ -1,21 +1,20 @@
 import React from "react";
-import { useParallax } from "../hooks/useParallax.js";
 
-/* Story band: the frame-020 background translates with scroll (depth 0.18,
- * scale 1.12 cover) — transform only, settled to `none` under reduced
- * motion. */
+/* Full-bleed product image band with crisp copy overlay. */
 export default function Story() {
-  const { bandRef, bgRef } = useParallax();
-
   return (
-    <section className="parallax story" data-parallax="0.18" aria-labelledby="story-title" ref={bandRef}>
-      <div
-        className="parallax__bg"
-        ref={bgRef}
-        style={{ backgroundImage: "url('/assets/reel/frame-020.webp')" }}
-        aria-hidden="true"
-      />
-      <div className="shell story__inner">
+    <section className="section section--ink story js-reveal" aria-labelledby="story-title">
+      <div className="story__bg">
+        <img
+          src="/assets/products/product-motion-1.jpg"
+          alt="Ice cubes in motion"
+          width="923"
+          height="1152"
+          decoding="async"
+          loading="lazy"
+        />
+      </div>
+      <div className="story__inner">
         <p className="eyebrow">The cold room</p>
         <h2 id="story-title">Cold is a service, not a slogan.</h2>
         <p className="story__body">
