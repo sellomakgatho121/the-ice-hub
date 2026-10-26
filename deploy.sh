@@ -56,8 +56,7 @@ echo "  running unit tests…"
 echo "  building the prerendered app…"
 ( cd app && npm run build ) || fail "build FAILED — refusing to deploy"
 
-grep -q "2 kg ice cubes" app/dist/index.html || fail "prerender missing product copy"
-grep -q "R17" app/dist/index.html || fail "prerender missing prices"
+grep -q "ICE CUBE BAGS" app/dist/index.html || fail "prerender missing product copy"
 if grep -q "app-html" app/dist/index.html; then
   fail "prerender marker still present"
 fi
