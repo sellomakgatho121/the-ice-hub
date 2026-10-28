@@ -91,9 +91,12 @@
              existing frame reel remains as a resilient fallback until the
              video asset is present and decodes successfully. -->
         <video class="hero__video" data-video-reel muted playsinline preload="metadata"
-               poster="assets/reel/the-ice-hub-hero-poster.jpg" aria-hidden="true">
+               poster="assets/reel/the-ice-hub-product-poster.jpg" aria-hidden="true">
           <source src="assets/reel/the-ice-hub-hero-scrub.mp4" type="video/mp4" />
         </video>
+        <img class="hero__product-fallback" src="assets/reel/the-ice-hub-product-poster.jpg"
+             alt="THE ICE HUB branded bag of ice cubes" width="1280" height="720"
+             decoding="async" aria-hidden="true" />
         <img id="reel-img" class="hero__reel is-front" src="assets/reel/frame-001.webp" alt=""
              width="1280" height="720" decoding="async" fetchpriority="high" data-reel-layer />
         <img class="hero__reel" src="assets/reel/frame-001.webp" alt=""
