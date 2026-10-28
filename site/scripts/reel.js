@@ -1,75 +1,30 @@
-/* The Ice Hub — hero reel scrub.
+/* The Ice Hub — deterministic scroll-scrubbed hero.
  *
- * Two stacked <img> layers crossfade between frames. A single layer with a
- * swapped `src` produces one hard snap per frame change, which reads as
- * choppy no matter how the scroll handler is tuned; dissolving the two layers
- * is what actually removes the stutter. `img.decode()` guarantees a frame is
- * rasterised before it is faded in, so a frame can never paint late or flash.
+ * Primary path: supplied, seek-optimized MP4.
+ * Resilience path: existing crossfaded WebP frames if the MP4 is unavailable.
+ * The hero remains useful if either animation path fails or motion is reduced.
  */
-
-const TOTAL = 30;
-const PAD = 3;
-const FRAME = (n) => `assets/reel/frame-${String(n).padStart(PAD, "0")}.webp`;
-
-/* Beat frame ranges, mapped to the animation rather than to arithmetic.
- *
- * SINGLE CLIP. The owner chose video 1 alone at its native 1280x720 over the
- * two-clip merge, so there is no seam anywhere in this reel: every one of the
- * 29 transitions crossfades. Source is 8s / 192 native frames at 24fps — the
- * bag holds still, tilts, bursts at ~3.0s, then tumbles.
- *
- *   1-8   source  1-47    0.0-1.9s  bag at rest, hero statement
- *   9-11  source 54-72    2.2-3.0s  the tilt
- *   12-15 source 79-93    3.2-3.8s  the burst
- *   16-30 source 100-192  4.1-7.9s  tumble, handing off to the Counter
- *
- * Density, not frame count, governs perceived smoothness:
- * px/frame = (heroVh - 100)/100 * viewportHeight / 30. At 150svh that is
- * ~15 px/frame, the same density the previous 48-frame 360p reel had at
- * 180svh. The shorter runway is what buys the pixels-per-frame; dropping to 30
- * frames cost nothing provided the hero came down with it.
- */
-const BEATS = [
-  [1, 8],
-  [9, 11],
-  [12, 15],
-  [16, 30],
-];
-
-/* No cut to handle — this reel is one continuous clip. Kept at 0 so that
-   restoring a multi-clip reel is a one-line change; see extract-video1-720p.sh
-   and the superseded incoming/extract-reel-frames.sh. */
-const CUT_AFTER = 0;
-
 const hero = document.querySelector("[data-hero]");
-const layers = [...document.querySelectorAll("[data-reel-layer]")];
-const media = layers[0]?.parentElement;
+const media = document.querySelector("[data-hero-media]");
+const video = document.querySelector("[data-video-reel]");
 const bar = document.querySelector("[data-reel-bar]");
 const indexLabel = document.querySelector("[data-frame-index]");
 const totalLabel = document.querySelector("[data-frame-total]");
 const beatNodes = [...document.querySelectorAll("[data-beat]")];
-
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const saveData = navigator.connection?.saveData === true;
 const slowConnection = /(^|-)2g$/.test(navigator.connection?.effectiveType ?? "");
-
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-const cache = new Map();
-let front = 0;
-let lastIndex = 1;
-let lastBeat = 0;
-let token = 0;
-let ticking = false;
+let activeMode = "pending";
 let disposed = false;
-
-function warm(n) {
-  if (cache.has(n)) return;
-  const img = new Image();
-  img.decoding = "async";
-  img.src = FRAME(n);
-  cache.set(n, img);
-}
+let ticking = false;
+let lastBeat = 0;
+let lastVideoProgress = -1;
+let targetTime = 0;
+let seeking = false;
+let seekQueued = false;
+let frameFallbackStarted = false;
 
 function paintBeat(beat) {
   if (beat === lastBeat) return;
@@ -80,101 +35,221 @@ function paintBeat(beat) {
   }
 }
 
-async function show(idx, hard) {
-  const mine = ++token;
-  const back = layers[1 - front];
-  if (!back) return;
-
-  back.src = FRAME(idx);
-
-  if (back.decode) {
-    try {
-      await back.decode();
-    } catch {
-      return;
-    }
-  } else if (!back.complete) {
-    await new Promise((resolve) => {
-      back.addEventListener("load", resolve, { once: true });
-      back.addEventListener("error", resolve, { once: true });
-    });
-  }
-  if (!back.complete || back.naturalWidth === 0) return;
-
-  if (mine !== token || disposed || reducedQuery.matches) return;
-
-  if (hard && media) {
-    media.classList.add("is-hard");
-    requestAnimationFrame(() => requestAnimationFrame(() => media.classList.remove("is-hard")));
-  }
-
-  layers[front].classList.remove("is-front");
-  back.classList.add("is-front");
-  front = 1 - front;
-}
-
-function paint() {
-  ticking = false;
-  if (disposed || reducedQuery.matches || !hero) return;
-
+function getProgress() {
+  if (!hero) return 0;
   const rect = hero.getBoundingClientRect();
   const runway = Math.max(hero.offsetHeight - window.innerHeight, 1);
-  const t = clamp(-rect.top / runway, 0, 1);
-  const idx = clamp(1 + Math.floor(t * TOTAL), 1, TOTAL);
+  return clamp(-rect.top / runway, 0, 1);
+}
 
-  paintBeat(BEATS.findIndex(([a, b]) => idx >= a && idx <= b) + 1);
-  if (bar) bar.style.transform = `scaleX(${t.toFixed(4)})`;
+function paintVideo() {
+  ticking = false;
+  if (disposed || !hero) return;
+  const progress = getProgress();
+  const beat = Math.min(4, Math.floor(progress * 4) + 1);
+  paintBeat(beat);
+  if (bar) bar.style.transform = `scaleX(${progress.toFixed(4)})`;
 
-  if (idx === lastIndex) return;
-  const hard = lastIndex === CUT_AFTER;
-  lastIndex = idx;
-  if (indexLabel) indexLabel.textContent = String(idx).padStart(PAD, "0");
-
-  show(idx, hard);
+  if (activeMode === "video" && video && Number.isFinite(video.duration) && video.duration > 0) {
+    targetTime = progress * video.duration;
+    if (Math.abs(progress - lastVideoProgress) > 0.002) {
+      lastVideoProgress = progress;
+      queueSeek();
+    }
+    if (indexLabel) indexLabel.textContent = String(Math.min(4, Math.floor(progress * 4) + 1)).padStart(2, "0");
+    if (totalLabel) totalLabel.textContent = "04";
+  }
 }
 
 function queuePaint() {
   if (ticking || disposed) return;
   ticking = true;
-  requestAnimationFrame(paint);
+  requestAnimationFrame(paintVideo);
 }
 
-async function warmAll() {
-  for (let n = 1; n <= TOTAL; n += 4) {
-    for (let k = n; k < Math.min(n + 4, TOTAL + 1); k += 1) {
-      warm(k);
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    }
+function queueSeek() {
+  if (!video || activeMode !== "video" || reducedQuery.matches) return;
+  if (seeking) {
+    seekQueued = true;
+    return;
   }
+  requestAnimationFrame(() => {
+    if (!video || activeMode !== "video" || video.readyState < HTMLMediaElement.HAVE_METADATA) return;
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    if (!duration) return;
+    const nextTime = clamp(targetTime, 0, Math.max(0, duration - 0.001));
+    if (Math.abs(video.currentTime - nextTime) < 0.035) return;
+    seeking = true;
+    seekQueued = false;
+    try {
+      video.currentTime = nextTime;
+    } catch {
+      seeking = false;
+    }
+  });
+}
+
+function onSeeked() {
+  seeking = false;
+  if (seekQueued || (video && Math.abs(video.currentTime - targetTime) > 0.12)) {
+    seekQueued = false;
+    queueSeek();
+  }
+}
+
+function enableVideo() {
+  if (!video || activeMode === "video" || reducedQuery.matches) return;
+  if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+  activeMode = "video";
+  media?.classList.remove("has-poster-fallback");
+  media?.classList.add("has-video");
+  video.classList.add("is-ready");
+  video.pause();
+  targetTime = getProgress() * video.duration;
+  queueSeek();
+  queuePaint();
+}
+
+function startFrameFallback() {
+  if (activeMode === "frames") return;
+  activeMode = "frames";
+  media?.classList.remove("has-video");
+  media?.classList.add("has-poster-fallback");
+  video?.classList.remove("is-ready");
+  if (!frameFallbackStarted) {
+    frameFallbackStarted = true;
+    initFrameFallback();
+  }
+  queuePaint();
 }
 
 function setReducedState(reduced) {
   if (reduced) {
-    token += 1;
+    video?.pause();
+    if (video) {
+      try { video.currentTime = 0; } catch {}
+    }
+    media?.classList.remove("has-video");
+    media?.classList.add("has-poster-fallback");
+    if (activeMode !== "frames") {
+      activeMode = "frames";
+      media?.classList.remove("has-video");
+      if (!frameFallbackStarted) {
+        frameFallbackStarted = true;
+        initFrameFallback(true);
+      } else {
+        document.querySelectorAll("[data-reel-layer]").forEach((layer, i) => {
+          layer.src = "assets/reel/frame-001.webp";
+          layer.classList.toggle("is-front", i === 0);
+        });
+      }
+    }
+    document.body.dataset.state = "still";
+    if (bar) bar.style.transform = "scaleX(0)";
+    paintBeat(1);
+    return;
+  }
+  document.body.dataset.state = "ready";
+  if (video && video.readyState >= HTMLMediaElement.HAVE_METADATA && video.duration > 0) enableVideo();
+  else if (activeMode === "frames") queuePaint();
+}
+
+function initFrameFallback(forceStill = false) {
+  const TOTAL = 30;
+  const PAD = 3;
+  const FRAME = (n) => `assets/reel/frame-${String(n).padStart(PAD, "0")}.webp`;
+  const layers = [...document.querySelectorAll("[data-reel-layer]")];
+  let front = 0;
+  let lastIndex = 1;
+  let token = 0;
+  const cache = new Map();
+
+  function warm(n) {
+    if (cache.has(n)) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = FRAME(n);
+    cache.set(n, img);
+  }
+
+  async function show(idx) {
+    const mine = ++token;
+    const back = layers[1 - front];
+    if (!back) return;
+    back.src = FRAME(idx);
+    if (back.decode) {
+      try { await back.decode(); } catch { return; }
+    } else if (!back.complete) {
+      await new Promise((resolve) => {
+        back.addEventListener("load", resolve, { once: true });
+        back.addEventListener("error", resolve, { once: true });
+      });
+    }
+    if (!back.complete || back.naturalWidth === 0 || mine !== token || disposed || reducedQuery.matches) return;
+    layers[front].classList.remove("is-front");
+    back.classList.add("is-front");
+    front = 1 - front;
+  }
+
+  function paintFrames() {
+    if (disposed || activeMode !== "frames" || !hero) return;
+    const progress = getProgress();
+    const idx = clamp(1 + Math.floor(progress * TOTAL), 1, TOTAL);
+    if (idx === lastIndex) return;
+    lastIndex = idx;
+    if (indexLabel) indexLabel.textContent = String(idx).padStart(PAD, "0");
+    if (totalLabel) totalLabel.textContent = String(TOTAL);
+    show(idx);
+  }
+
+  const framePaint = () => {
+    if (ticking || disposed || activeMode !== "frames") return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      paintFrames();
+      if (bar) bar.style.transform = `scaleX(${getProgress().toFixed(4)})`;
+      paintBeat(Math.min(4, Math.floor(getProgress() * 4) + 1));
+    });
+  };
+
+  window.addEventListener("scroll", framePaint, { passive: true });
+  window.addEventListener("resize", framePaint, { passive: true });
+  if (forceStill || reducedQuery.matches) {
     layers.forEach((layer, i) => {
       layer.src = FRAME(1);
       layer.classList.toggle("is-front", i === 0);
     });
-    front = 0;
-    if (indexLabel) indexLabel.textContent = "01";
-    if (bar) bar.style.transform = "scaleX(0)";
-    paintBeat(1);
-    document.body.dataset.state = "still";
-    return;
+  } else {
+    [1, 2, 8, 15, 22, 26].forEach(warm);
+    if (!saveData && !slowConnection) {
+      if ("requestIdleCallback" in window) requestIdleCallback(() => {
+        for (let n = 1; n <= TOTAL; n += 1) warm(n);
+      }, { timeout: 2000 });
+      else setTimeout(() => { for (let n = 1; n <= TOTAL; n += 1) warm(n); }, 500);
+    }
+    framePaint();
   }
-  document.body.dataset.state = "ready";
-  queuePaint();
 }
 
-// Metered connections are common in Tembisa: warm sparsely, never the full run.
-/* The sparse list must stay inside [1, TOTAL]: 34 and 48 were the 48-frame
-   reel's anchors and fetched files that no longer belong to the set. */
-if (!saveData && !slowConnection) {
-  [1, 2, 8, 15, 22, 26].forEach(warm);
-  if ("requestIdleCallback" in window) requestIdleCallback(() => warmAll(), { timeout: 2000 });
-  else setTimeout(() => warmAll(), 500);
+if (video) {
+  video.addEventListener("loadedmetadata", enableVideo);
+  video.addEventListener("canplay", enableVideo);
+  video.addEventListener("seeked", onSeeked);
+  video.addEventListener("error", startFrameFallback);
+  video.addEventListener("emptied", () => {
+    if (activeMode === "pending") startFrameFallback();
+  });
+  if (video.readyState >= HTMLMediaElement.HAVE_METADATA && video.duration > 0) enableVideo();
+  else {
+    // Do not leave the opening viewport waiting for the MP4. The existing
+    // first frame remains visible until metadata confirms a usable video.
+    setTimeout(() => {
+      if (activeMode === "pending") startFrameFallback();
+    }, 5000);
+  }
 } else {
-  [1, TOTAL].forEach(warm);
+  startFrameFallback();
 }
 
 window.addEventListener("scroll", queuePaint, { passive: true });
@@ -182,18 +257,11 @@ window.addEventListener("resize", queuePaint, { passive: true });
 reducedQuery.addEventListener?.("change", (event) => setReducedState(event.matches));
 
 if ("IntersectionObserver" in window && hero) {
-  new IntersectionObserver(
-    (entries) => {
-      disposed = !entries[0].isIntersecting;
-      if (disposed) token += 1;
-      else queuePaint();
-    },
-    { rootMargin: "100% 0px" },
-  ).observe(hero);
+  new IntersectionObserver(([entry]) => {
+    disposed = !entry.isIntersecting;
+    if (!disposed) queuePaint();
+  }, { rootMargin: "100% 0px" }).observe(hero);
 }
 
 setReducedState(reducedQuery.matches);
-
-/* Derived from TOTAL, not hardcoded: the hero still read "01 -> 20" after the
-   reel grew to 48 frames, because the number had been written into the markup. */
-if (totalLabel) totalLabel.textContent = String(TOTAL);
+if (totalLabel && !video) totalLabel.textContent = "30";
