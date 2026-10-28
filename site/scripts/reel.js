@@ -101,6 +101,7 @@ function enableVideo() {
   if (!video || activeMode === "video" || reducedQuery.matches) return;
   if (!Number.isFinite(video.duration) || video.duration <= 0) return;
   activeMode = "video";
+  media?.classList.remove("has-poster-fallback");
   media?.classList.add("has-video");
   video.classList.add("is-ready");
   video.pause();
@@ -113,6 +114,7 @@ function startFrameFallback() {
   if (activeMode === "frames") return;
   activeMode = "frames";
   media?.classList.remove("has-video");
+  media?.classList.add("has-poster-fallback");
   video?.classList.remove("is-ready");
   if (!frameFallbackStarted) {
     frameFallbackStarted = true;
@@ -128,6 +130,7 @@ function setReducedState(reduced) {
       try { video.currentTime = 0; } catch {}
     }
     media?.classList.remove("has-video");
+    media?.classList.add("has-poster-fallback");
     if (activeMode !== "frames") {
       activeMode = "frames";
       media?.classList.remove("has-video");
