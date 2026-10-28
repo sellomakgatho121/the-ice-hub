@@ -110,12 +110,14 @@ function enableVideo() {
 }
 
 function startFrameFallback() {
-  if (frameFallbackStarted) return;
-  frameFallbackStarted = true;
+  if (activeMode === "frames") return;
   activeMode = "frames";
   media?.classList.remove("has-video");
   video?.classList.remove("is-ready");
-  initFrameFallback();
+  if (!frameFallbackStarted) {
+    frameFallbackStarted = true;
+    initFrameFallback();
+  }
   queuePaint();
 }
 
@@ -128,7 +130,16 @@ function setReducedState(reduced) {
     media?.classList.remove("has-video");
     if (activeMode !== "frames") {
       activeMode = "frames";
-      initFrameFallback(true);
+      media?.classList.remove("has-video");
+      if (!frameFallbackStarted) {
+        frameFallbackStarted = true;
+        initFrameFallback(true);
+      } else {
+        document.querySelectorAll("[data-reel-layer]").forEach((layer, i) => {
+          layer.src = "assets/reel/frame-001.webp";
+          layer.classList.toggle("is-front", i === 0);
+        });
+      }
     }
     document.body.dataset.state = "still";
     if (bar) bar.style.transform = "scaleX(0)";
