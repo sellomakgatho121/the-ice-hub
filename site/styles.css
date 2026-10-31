@@ -1521,3 +1521,42 @@ em { font-style: normal; color: var(--refract); }
   .audience,
   .visit { padding-block: var(--space-xl); }
 }
+
+/* Native scroll-scrubbed MP4 hero. The branded poster remains underneath
+   until the browser has decoded a usable video frame. */
+.hero { min-block-size: 175svh; }
+.hero__media { overflow: hidden; background: var(--abyss); }
+.hero__product-poster,
+.hero__video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.hero__product-poster { z-index: var(--z-base); opacity: 1; }
+.hero__video {
+  z-index: calc(var(--z-base) + 1);
+  opacity: 0;
+  pointer-events: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+.hero__media[data-video-state="ready"] .hero__video { opacity: 1; }
+.hero__media[data-video-state="ready"] .hero__product-poster { opacity: 0; }
+.hero__media[data-video-state="error"] .hero__video,
+.hero__media[data-video-state="reduced"] .hero__video { opacity: 0; }
+.hero__media[data-video-state="error"] .hero__product-poster,
+.hero__media[data-video-state="reduced"] .hero__product-poster { opacity: 1; }
+.hero__product-poster { transition: opacity 180ms ease-out; }
+@media (max-width: 767px) {
+  .hero { min-block-size: 125svh; }
+  .hero__stage { position: sticky; block-size: 100svh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero { min-block-size: 100svh; }
+  .hero__stage { position: relative; }
+  .hero__product-poster { transition: none; }
+  .hero__video { display: none; }
+}
