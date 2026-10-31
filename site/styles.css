@@ -1521,3 +1521,46 @@ em { font-style: normal; color: var(--refract); }
   .audience,
   .visit { padding-block: var(--space-xl); }
 }
+
+/* Scroll-scrubbed MP4 hero. The frame reel remains available as a fallback. */
+.hero__video {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  pointer-events: none;
+  background: var(--abyss);
+}
+.hero__media.has-video .hero__video { opacity: 1; }
+.hero__media.has-video [data-reel-layer] { opacity: 0; }
+.hero__media.has-video .hero__veil { z-index: 1; }
+.hero__video.is-ready { will-change: contents; }
+@media (prefers-reduced-motion: reduce) {
+  .hero__video { transition: none; }
+}
+
+
+/* Owner-provided branded product poster: loading, decode-failure, and reduced-motion fallback. */
+.hero__product-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--abyss);
+}
+.hero__media.has-poster-fallback .hero__product-fallback { opacity: 1; }
+.hero__media.has-poster-fallback .hero__video,
+.hero__media.has-poster-fallback [data-reel-layer] { opacity: 0; }
+.hero__media.has-video .hero__product-fallback { opacity: 0; }
