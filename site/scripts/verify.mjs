@@ -89,36 +89,33 @@ const heroBox = await page.locator("[data-hero]").evaluate((el) => ({
   viewport: innerHeight,
 }));
 
-/* The reel must advance monotonically and show distinct frames. */
-const seen = [];
+/* Native MP4 scrubbing: sample progress in both directions and ensure
+   currentTime tracks the deterministic scroll mapping. */
+const seenTimes = [];
 const beats = [];
 for (const [index, fraction] of [0, 0.2, 0.4, 0.6, 0.8, 1].entries()) {
   await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }),
     heroBox.top + (heroBox.height - heroBox.viewport) * fraction);
-  await page.waitForTimeout(180);
-  seen.push(await page.locator("[data-reel-layer].is-front").getAttribute("src"));
+  await page.waitForTimeout(260);
+  seenTimes.push(await page.locator("[data-video-reel]").evaluate((el) => el.currentTime));
   beats.push(await page.evaluate(() =>
     document.querySelector("[data-beat][data-active]")?.dataset.beat ?? null));
   await page.screenshot({ path: path.join(OUT, `hero-${String(index + 1).padStart(2, "0")}.png`) });
 }
-step("hero scrub shows distinct frames", new Set(seen).size >= 5, { frames: seen, distinct: new Set(seen).size });
-/* Frames are zero-padded to 3 digits (001-030), so the range is checked
-   numerically. A regex assuming 2 digits silently rejected frame-001. */
-const reelIndex = (src) => {
-  const m = /^assets\/reel\/frame-(\d{3})\.webp$/.exec(src ?? "");
-  return m ? Number(m[1]) : null;
-};
-const reelIndices = seen.map(reelIndex);
-step("frames stay inside the 30-frame reel",
-  reelIndices.every((n) => n !== null && n >= 1 && n <= 30), { frames: seen, indices: reelIndices });
-step("exactly one reel layer is frontmost", await page.evaluate(() => {
-  const front = [...document.querySelectorAll("[data-reel-layer]")].filter((n) => n.classList.contains("is-front"));
-  const layers = document.querySelectorAll("[data-reel-layer]");
-  return front.length === 1 && layers.length === 2;
-}), {});
-step("crossfade duration is set on the reel",
-  await page.evaluate(() => getComputedStyle(document.querySelector("[data-reel-layer]")).transitionDuration !== "0s"),
-  {});
+const increasing = seenTimes.every((time, i) => i === 0 || time >= seenTimes[i - 1] - 0.04);
+step("video currentTime advances with forward scroll", increasing && seenTimes[5] > seenTimes[0] + 1,
+  { times: seenTimes });
+await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }),
+  heroBox.top + (heroBox.height - heroBox.viewport) * 0.25);
+await page.waitForTimeout(350);
+const reverseTime = await page.locator("[data-video-reel]").evaluate((el) => el.currentTime);
+step("reverse scroll rewinds the same video", reverseTime < seenTimes[5] - 1,
+  { reverseTime, endTime: seenTimes[5] });
+step("hero poster and MP4 are wired", await page.evaluate(() => ({
+  poster: document.querySelector("[data-video-reel]")?.getAttribute("poster"),
+  source: document.querySelector("[data-video-reel] source")?.getAttribute("src"),
+})).then((x) => x.poster?.includes("ChatGPT%20Image") && x.source?.endsWith(".mp4")),
+  { poster: "ChatGPT product image", source: "uploaded MP4" });
 step("exactly one beat active at a time",
   beats.every((b) => b !== null), { beats });
 
@@ -150,7 +147,7 @@ const runtime = await page.evaluate(() => ({
 step("three product cards, no canvas, no WebGL", runtime.cards === 3 && !runtime.canvas, runtime);
 step("no horizontal overflow at 1440", runtime.pageWidth <= runtime.viewportWidth, runtime);
 step("fonts loaded", runtime.fonts === "loaded", { fonts: runtime.fonts });
-step("reel frame count within the set", runtime.frameSet.length <= 30, { frames: runtime.frameSet.length });
+step("MP4 metadata and decoded frame available", runtime.videoReady && runtime.videoDuration > 0, { videoReady: runtime.videoReady, duration: runtime.videoDuration });
 
 /* Zero third-party requests on load is the strictest rule in the contract. */
 step("no third-party request on load", thirdParty.length === 0, { thirdParty });
