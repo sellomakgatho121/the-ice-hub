@@ -86,12 +86,16 @@
   <section class="hero" id="hero" data-hero aria-labelledby="hero-statement">
     <div class="hero__stage">
 
-      <div class="hero__media grain">
-        <img id="reel-img" class="hero__reel is-front" src="assets/reel/frame-001.webp" alt=""
-             width="1280" height="720" decoding="async" fetchpriority="high" data-reel-layer />
-        <img class="hero__reel" src="assets/reel/frame-001.webp" alt=""
-             width="1280" height="720" decoding="async" aria-hidden="true" data-reel-layer />
+      <div class="hero__media grain" data-hero-media data-video-state="loading">
+        <img class="hero__product-poster" src="assets/reel/ChatGPT%20Image%20Oct%2028%2C%202026%2C%2008_12_32%20PM.png"
+             alt="THE ICE HUB branded bag of ice cubes" width="1280" height="720"
+             decoding="async" fetchpriority="high" data-video-poster />
+        <video class="hero__video" data-video-reel muted playsinline preload="metadata"
+               poster="assets/reel/ChatGPT%20Image%20Oct%2028%2C%202026%2C%2008_12_32%20PM.png" aria-hidden="true">
+          <source src="assets/reel/1054543574_1791915553774983.mp4" type="video/mp4" />
+        </video>
         <div class="hero__veil" aria-hidden="true"></div>
+        <span class="sr-only" role="status" aria-live="polite" data-video-status>Loading hero video</span>
       </div>
 
       <div class="hero__beats">
@@ -121,9 +125,25 @@
         </div>
       </div>
 
+      <aside class="hero__side-panel" aria-label="The Ice Hub at a glance">
+        <div class="hero__side-item"><span class="hero__side-icon" aria-hidden="true">02</span><span><strong>2 kg ice cubes</strong><small>R17 per bag</small></span></div>
+        <div class="hero__side-item"><span class="hero__side-icon" aria-hidden="true">03</span><span><strong>3 kg ice cubes</strong><small>R22 per bag</small></span></div>
+        <div class="hero__side-item"><span class="hero__side-icon" aria-hidden="true">30+</span><span><strong>Bulk orders</strong><small>Stock-price tier</small></span></div>
+        <div class="hero__side-item"><span class="hero__side-icon" aria-hidden="true">↗</span><span><strong>Free delivery</strong><small>Around Tembisa</small></span></div>
+      </aside>
+
       <div class="hero__progress" aria-hidden="true"><span data-reel-bar></span></div>
     </div>
   </section>
+
+  <nav class="hero-occasions" aria-label="Ice for every occasion">
+    <div class="hero-occasions__intro"><span>THE ICE HUB</span><strong>For every occasion</strong></div>
+    <a href="#products">Everyday</a>
+    <a href="#delivery">Parties &amp; events</a>
+    <a href="#delivery">Businesses</a>
+    <a href="#delivery">Bars &amp; venues</a>
+    <a href="#visit">Visit us</a>
+  </nav>
 
   <!-- ========================================================== counter -->
   <!-- Counter material: the flip from the cold room to the service counter.
