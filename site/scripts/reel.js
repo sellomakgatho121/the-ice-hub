@@ -100,7 +100,7 @@ function onMetadata() {
   latestTarget = progressFromScroll() * video.duration;
   video.pause();
   requestLatestSeek();
-  if (status) status.textContent = "Hero video loaded";
+  if (status) status.textContent = "Hero video metadata loaded";
 }
 
 function onUsableFrame() {
@@ -159,6 +159,9 @@ if ("IntersectionObserver" in window && hero) {
 if (reducedQuery.matches) onMotionPreference({ matches: true });
 else {
   setState("loading", "Loading hero video");
+  window.setTimeout(() => {
+    if (!metadataReady && video && video.readyState < HTMLMediaElement.HAVE_METADATA) failVideo();
+  }, 12000);
   queuePaint();
 }
 
