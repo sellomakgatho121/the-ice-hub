@@ -225,17 +225,23 @@ step("axe: zero WCAG A/AA violations", axe.violations.length === 0, {
 });
 await desktop.close();
 
-/* ------------------------------------------ a single frame that fails to load */
+/* ---------------------------------------- MP4 failure / poster fallback */
 const broken = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-await broken.route("**/assets/reel/frame-01*.webp", (route) => route.abort());
+await broken.route("**/assets/reel/*.mp4", (route) => route.abort());
 const { page: brokenPage } = await openPage(broken);
-await brokenPage.evaluate(() => scrollTo({ top: innerHeight * 4, behavior: "instant" }));
 await brokenPage.waitForTimeout(300);
-const stillShows = await brokenPage.evaluate(() => {
-  const front = document.querySelector("[data-reel-layer].is-front");
-  return Boolean(front?.getAttribute("src")) && front.getBoundingClientRect().height > 0;
+const posterFallback = await brokenPage.evaluate(() => {
+  const media = document.querySelector("[data-hero-media]");
+  const poster = document.querySelector("[data-video-poster]");
+  return {
+    state: media?.dataset.videoState,
+    src: poster?.getAttribute("src"),
+    visible: Boolean(poster && getComputedStyle(poster).opacity !== "0" && poster.getBoundingClientRect().height > 0),
+  };
 });
-step("a failed reel frame holds the nearest frame, never blanks", stillShows, {});
+step("MP4 failure shows the branded product poster",
+  posterFallback.state === "error" && posterFallback.visible && posterFallback.src?.includes("ChatGPT%20Image"),
+  posterFallback);
 await broken.close();
 
 /* ------------------------------------------------------- reduced motion */
