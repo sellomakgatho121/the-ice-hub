@@ -111,6 +111,20 @@ await page.waitForTimeout(350);
 const reverseTime = await page.locator("[data-video-reel]").evaluate((el) => el.currentTime);
 step("reverse scroll rewinds the same video", reverseTime < seenTimes[5] - 1,
   { reverseTime, endTime: seenTimes[5] });
+/* Rapid reversals must settle on the final scroll position, not an old queued
+   seek. This is the key regression test for the single-in-flight seek gate. */
+for (const fraction of [0.82, 0.18, 0.76, 0.12]) {
+  await page.evaluate(({ top, fraction }) =>
+    scrollTo({ top: top + (document.querySelector("[data-hero]").offsetHeight - innerHeight) * fraction, behavior: "instant" }),
+    { top: heroBox.top, fraction });
+  await page.waitForTimeout(45);
+}
+await page.waitForTimeout(500);
+const finalRapidTime = await page.locator("[data-video-reel]").evaluate((el) => el.currentTime);
+const duration = await page.locator("[data-video-reel]").evaluate((el) => el.duration);
+step("rapid direction reversals settle at the latest scroll target",
+  Math.abs(finalRapidTime - duration * 0.12) < 0.65,
+  { finalRapidTime, expected: duration * 0.12, duration });
 step("hero poster and MP4 are wired", await page.evaluate(() => ({
   poster: document.querySelector("[data-video-reel]")?.getAttribute("poster"),
   source: document.querySelector("[data-video-reel] source")?.getAttribute("src"),
@@ -295,6 +309,7 @@ const mobileLayout = await mobilePage.evaluate(() => {
     })),
   };
 });
+step("mobile hero uses a shorter scroll runway", await mobilePage.locator("[data-hero]").evaluate((el) => el.offsetHeight <= innerHeight * 1.3), {});
 step("no horizontal overflow at 390", mobileLayout.pageWidth <= mobileLayout.viewportWidth, mobileLayout);
 step("all tap targets at least 44px", mobileLayout.minTarget >= 44, mobileLayout);
 await mobile.close();
