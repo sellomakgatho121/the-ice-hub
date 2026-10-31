@@ -25,6 +25,7 @@ let usableFrame = false;
 
 function setState(state, message) {
   if (media) media.dataset.videoState = state;
+  if (document.body) document.body.dataset.state = state === "reduced" || state === "error" ? "still" : state === "ready" ? "ready" : "loading";
   if (status && message) status.textContent = message;
 }
 
