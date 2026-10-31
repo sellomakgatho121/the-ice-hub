@@ -1560,3 +1560,6 @@ em { font-style: normal; color: var(--refract); }
   .hero__product-poster { transition: none; }
   .hero__video { display: none; }
 }
+
+/* Keep the cinematic grade above the video while leaving live HTML copy above both. */
+.hero__veil { z-index: calc(var(--z-base) + 2); }
