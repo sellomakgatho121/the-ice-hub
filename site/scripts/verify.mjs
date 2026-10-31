@@ -136,13 +136,8 @@ const runtime = await page.evaluate(() => ({
   viewportWidth: document.documentElement.clientWidth,
   fonts: document.fonts.status,
   cards: document.querySelectorAll("[data-product-card]").length,
-  /* The two-layer reel fetches frame-001 through both <img> layers as well as
-     the script's warm-up, so resource ENTRIES exceed the set (32 vs 30). The
-     budget is on distinct frame files, which is the invariant the 30-frame
-     contract actually owns. */
-  frameSet: [...new Set(performance.getEntriesByType("resource")
-    .map((e) => (/assets\/reel\/frame-(\d{3})\.webp$/.exec(e.name) ?? [])[1])
-    .filter(Boolean))],
+  videoReady: document.querySelector("[data-video-reel]")?.readyState >= 2,
+  videoDuration: document.querySelector("[data-video-reel]")?.duration ?? 0,
 }));
 step("three product cards, no canvas, no WebGL", runtime.cards === 3 && !runtime.canvas, runtime);
 step("no horizontal overflow at 1440", runtime.pageWidth <= runtime.viewportWidth, runtime);
